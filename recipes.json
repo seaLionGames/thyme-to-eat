@@ -1,0 +1,333 @@
+[
+  {
+    "id": 1,
+    "name": "Classic Pad Thai",
+    "emoji": "🍜",
+    "prepTime": "25 mins",
+    "cuisine": "Asian",
+    "protein": "Chicken",
+    "style": "Noodles",
+    "description": "Stir-fried rice noodles with a sweet-savory tamarind sauce, tender chicken, scrambled egg, fresh bean sprouts, and roasted peanuts.",
+    "ingredients": [
+      "8 oz Rice noodles",
+      "200g Chicken breast (sliced)",
+      "2 tbsp Tamarind paste",
+      "2 tbsp Fish sauce",
+      "1 tbsp Brown sugar",
+      "2 Eggs",
+      "1 cup Bean sprouts",
+      "1/4 cup Crushed peanuts",
+      "Lime wedges & cilantro"
+    ],
+    "instructions": [
+      "Soak rice noodles in warm water for 20 minutes until pliable, then drain.",
+      "Whisk tamarind paste, fish sauce, and brown sugar together in a small bowl.",
+      "Heat oil in a wok over medium-high heat, cook chicken until golden.",
+      "Push chicken to the side, crack in eggs and scramble gently.",
+      "Add noodles and sauce mixture; toss rapidly for 2-3 minutes until sauce is absorbed.",
+      "Stir in bean sprouts, serve immediately topped with crushed peanuts and lime."
+    ]
+  },
+  {
+    "id": 2,
+    "name": "Beef Tacos al Pastor",
+    "emoji": "🌮",
+    "prepTime": "20 mins",
+    "cuisine": "Mexican",
+    "protein": "Beef",
+    "style": "Sandwich/Wrap",
+    "description": "Flavorful seasoned flank steak served in warm corn tortillas with diced pineapple, chopped onions, and fresh cilantro.",
+    "ingredients": [
+      "1 lb Flank steak (thinly sliced)",
+      "1 tbsp Taco seasoning",
+      "1/2 cup Diced pineapple",
+      "8 Small corn tortillas",
+      "1/2 White onion (diced)",
+      "Fresh cilantro",
+      "Salsa verde"
+    ],
+    "instructions": [
+      "Season sliced steak generously with taco seasoning.",
+      "Sear steak in a scorching hot skillet for 3-4 minutes until nicely browned.",
+      "Warm corn tortillas in a dry skillet until soft and pliable.",
+      "Assemble tacos with beef, a spoon of diced pineapple, raw onion, and cilantro.",
+      "Serve hot with salsa verde on the side."
+    ]
+  },
+  {
+    "id": 3,
+    "name": "Creamy Tuscan Salmon",
+    "emoji": "🐟",
+    "prepTime": "25 mins",
+    "cuisine": "Mediterranean",
+    "protein": "Fish/Seafood",
+    "style": "Pasta",
+    "description": "Pan-seared salmon fillets simmered in a velvety garlic, sun-dried tomato, and spinach cream sauce over penne.",
+    "ingredients": [
+      "2 Salmon fillets",
+      "8 oz Penne pasta",
+      "1 cup Heavy cream",
+      "1/2 cup Sun-dried tomatoes (chopped)",
+      "2 cups Fresh baby spinach",
+      "3 cloves Garlic (minced)",
+      "1/2 cup Parmesan cheese (grated)"
+    ],
+    "instructions": [
+      "Boil penne pasta in salted water according to package directions.",
+      "Season salmon fillets with salt and pepper; sear in a skillet for 4 mins per side until cooked through, then remove.",
+      "In the same skillet, sauté garlic and sun-dried tomatoes for 1 minute.",
+      "Reduce heat, pour in heavy cream, and bring to a gentle simmer.",
+      "Stir in spinach and parmesan until spinach wilts and sauce thickens.",
+      "Toss in cooked pasta and place salmon fillets back on top."
+    ]
+  },
+  {
+    "id": 4,
+    "name": "Teriyaki Tofu Rice Bowl",
+    "emoji": "🍱",
+    "prepTime": "30 mins",
+    "cuisine": "Asian",
+    "protein": "Vegetarian/Tofu",
+    "style": "Rice",
+    "description": "Crispy pan-fried tofu glazed in home-made teriyaki sauce, served over fluffy jasmine rice with steamed broccoli.",
+    "ingredients": [
+      "1 block Extra-firm tofu (pressed & cubed)",
+      "2 tbsp Cornstarch",
+      "2 cups Cooked Jasmine rice",
+      "1/4 cup Soy sauce",
+      "2 tbsp Honey or maple syrup",
+      "1 tbsp Mirin",
+      "1 cup Steamed broccoli florets",
+      "Sesame seeds for garnish"
+    ],
+    "instructions": [
+      "Toss cubed tofu in cornstarch until lightly coated.",
+      "Pan-fry tofu in vegetable oil over medium-high heat until golden crisp on all sides (approx. 8-10 mins).",
+      "Whisk soy sauce, honey, mirin, and 1 tbsp water together.",
+      "Pour teriyaki sauce over the crispy tofu; simmer for 2 minutes until glossy and thick.",
+      "Serve tofu over warm jasmine rice with broccoli, garnished with sesame seeds."
+    ]
+  },
+  {
+    "id": 5,
+    "name": "Classic Cheeseburger",
+    "emoji": "🍔",
+    "prepTime": "15 mins",
+    "cuisine": "Western",
+    "protein": "Beef",
+    "style": "Sandwich/Wrap",
+    "description": "Juicy seared beef patty topped with melted cheddar cheese, lettuce, tomato, pickles, and special sauce on a toasted brioche bun.",
+    "ingredients": [
+      "1/2 lb Ground beef (80/20 blend)",
+      "2 Slices Cheddar cheese",
+      "2 Brioche burger buns",
+      "Crispy lettuce & sliced tomatoes",
+      "Pickle chips",
+      "Burger sauce (Mayonnaise, Ketchup, Relish blend)"
+    ],
+    "instructions": [
+      "Divide ground beef into two loose balls, then smash flat into thin patties.",
+      "Season aggressively with salt and black pepper.",
+      "Sear in a hot cast-iron skillet for 2.5 minutes until a deep crust forms.",
+      "Flip patties, immediately top with cheddar, and cook for 1 more minute.",
+      "Toast brioche buns, spread burger sauce, and assemble with lettuce, tomato, and pickles."
+    ]
+  },
+  {
+    "id": 6,
+    "name": "Hearty Chicken Noodle Soup",
+    "emoji": "🍲",
+    "prepTime": "35 mins",
+    "cuisine": "Western",
+    "protein": "Chicken",
+    "style": "Soup",
+    "description": "Comforting classic soup brimming with shredded chicken, egg noodles, carrots, celery, and fresh herbs in a rich broth.",
+    "ingredients": [
+      "2 cups Shredded cooked chicken",
+      "6 cups Chicken stock",
+      "1.5 cups Egg noodles",
+      "2 Carrots (sliced)",
+      "2 Celery stalks (chopped)",
+      "1 Medium onion (diced)",
+      "2 tbsp Fresh parsley",
+      "1 tbsp Butter"
+    ],
+    "instructions": [
+      "Melt butter in a large soup pot over medium heat. Add onion, carrots, and celery; cook for 6 minutes until softened.",
+      "Pour in chicken stock and bring to a boil.",
+      "Add egg noodles and simmer uncovered for 8-10 minutes until tender.",
+      "Stir in shredded chicken and fresh parsley; heat through for 2 minutes.",
+      "Season to taste with salt and pepper, serve warm."
+    ]
+  },
+  {
+    "id": 7,
+    "name": "Greek Lemon Orzo Soup (Avgolemono)",
+    "emoji": "🍋",
+    "prepTime": "25 mins",
+    "cuisine": "Mediterranean",
+    "protein": "Chicken",
+    "style": "Soup",
+    "description": "Silky, velvety Greek soup combining tender shredded chicken, orzo pasta, and a bright lemon-egg broth.",
+    "ingredients": [
+      "5 cups Chicken broth",
+      "3/4 cup Orzo pasta",
+      "2 cups Shredded cooked chicken",
+      "2 Large eggs",
+      "1/4 cup Fresh lemon juice",
+      "Fresh dill for serving"
+    ],
+    "instructions": [
+      "Bring chicken broth to a boil in a pot. Add orzo and cook for 9 minutes.",
+      "In a bowl, whisk eggs and fresh lemon juice together thoroughly.",
+      "Slowly ladle 1 cup of hot broth into the egg mixture while whisking constantly to temper the eggs.",
+      "Reduce pot heat to low, slowly pour tempered egg mixture back into the pot while stirring continuously.",
+      "Add shredded chicken and simmer gently for 3 minutes until thick and creamy (do not boil).",
+      "Garnish with fresh dill."
+    ]
+  },
+  {
+    "id": 8,
+    "name": "Pork Carnitas Burrito Bowl",
+    "emoji": "🌯",
+    "prepTime": "20 mins",
+    "cuisine": "Mexican",
+    "protein": "Pork",
+    "style": "Rice",
+    "description": "Crispy slow-cooked shredded pork served over cilantro-lime rice, black beans, corn salsa, and fresh avocado.",
+    "ingredients": [
+      "2 cups Crispy shredded pork carnitas",
+      "2 cups Cilantro-lime rice",
+      "1 can Black beans (warmed)",
+      "1/2 cup Sweet corn",
+      "1 Avocado (sliced)",
+      "Sour cream & Cotija cheese"
+    ],
+    "instructions": [
+      "Crisp up cooked pork carnitas in a hot skillet for 5 minutes.",
+      "Base each bowl with cilantro-lime rice.",
+      "Top with equal portions of carnitas, black beans, corn, and avocado slices.",
+      "Finish with a dollop of sour cream and sprinkled Cotija cheese."
+    ]
+  },
+  {
+    "id": 9,
+    "name": "Spicy Seafood Kimchi Ramen",
+    "emoji": "🍜",
+    "prepTime": "20 mins",
+    "cuisine": "Asian",
+    "protein": "Fish/Seafood",
+    "style": "Noodles",
+    "description": "A fiery, flavorful soup packed with ramen noodles, mixed seafood, aged kimchi, soft-boiled egg, and scallions.",
+    "ingredients": [
+      "1 pack Ramen noodles",
+      "150g Mixed seafood (shrimp, squid, mussels)",
+      "1/2 cup Aged kimchi (chopped)",
+      "3 cups Dashi or vegetable broth",
+      "1 tbsp Gochujang (Korean chili paste)",
+      "1 Soft-boiled egg",
+      "Green onions"
+    ],
+    "instructions": [
+      "Bring broth to a simmer with chopped kimchi and gochujang paste.",
+      "Add ramen noodles and seafood mix to the boiling broth.",
+      "Cook for 3-4 minutes until noodles are chewy and seafood is cooked through.",
+      "Transfer to a bowl, top with a soft-boiled egg half and sliced green onions."
+    ]
+  },
+  {
+    "id": 10,
+    "name": "Vegetarian Falafel Pita Wrap",
+    "emoji": "🥙",
+    "prepTime": "15 mins",
+    "cuisine": "Mediterranean",
+    "protein": "Vegetarian/Tofu",
+    "style": "Sandwich/Wrap",
+    "description": "Crispy chickpeas falafel balls tucked in warm pita pockets with diced cucumber, tomatoes, and creamy tahini sauce.",
+    "ingredients": [
+      "6-8 Prepared falafels (baked or fried)",
+      "2 Warm pita pockets",
+      "1/2 cup Cucumber & tomato (diced)",
+      "1/4 cup Shredded lettuce",
+      "3 tbsp Tahini sauce",
+      "Pickled red onions"
+    ],
+    "instructions": [
+      "Warm pita bread and cut open top to create pockets.",
+      "Stuff pita pockets with fresh lettuce, cucumber, tomato, and falafel balls.",
+      "Drizzle generously with creamy tahini sauce and top with pickled red onions."
+    ]
+  },
+  {
+    "id": 11,
+    "name": "Pork Tonkatsu Curry",
+    "emoji": "🍛",
+    "prepTime": "35 mins",
+    "cuisine": "Asian",
+    "protein": "Pork",
+    "style": "Rice",
+    "description": "Crispy panko-breaded pork cutlet served alongside rich, savory Japanese curry sauce and warm steamed rice.",
+    "ingredients": [
+      "2 Boneless pork chops",
+      "1/2 cup Panko breadcrumbs",
+      "1 Egg (beaten) & flour for dredging",
+      "2 Japanese curry roux blocks",
+      "1 Potato & 1 Carrot (cubed)",
+      "Steamed white rice"
+    ],
+    "instructions": [
+      "Boil cubed potatoes and carrots until tender; dissolve curry roux blocks in 2 cups hot water and combine with veggies.",
+      "Dredge pork chops in flour, dip in beaten egg, and coat thoroughly with panko breadcrumbs.",
+      "Deep-fry cutlets in oil at 350°F (175°C) for 5-6 minutes until golden and crispy.",
+      "Slice cutlet into strips and arrange over rice, ladling warm curry sauce alongside."
+    ]
+  },
+  {
+    "id": 12,
+    "name": "Creamy Tomato & Basil Pasta",
+    "emoji": "🍝",
+    "prepTime": "20 mins",
+    "cuisine": "Western",
+    "protein": "Vegetarian/Tofu",
+    "style": "Pasta",
+    "description": "Rich tomato sauce folded with heavy cream, fresh basil, and garlic, tossed with al dente rigatoni pasta.",
+    "ingredients": [
+      "8 oz Rigatoni pasta",
+      "1 can (14oz) Crushed tomatoes",
+      "1/3 cup Heavy cream",
+      "3 cloves Garlic (minced)",
+      "Handful fresh basil leaves",
+      "Grated Parmesan"
+    ],
+    "instructions": [
+      "Cook rigatoni in salted boiling water until al dente; reserve 1/2 cup pasta water.",
+      "Sauté minced garlic in olive oil for 1 minute. Add crushed tomatoes and simmer for 10 minutes.",
+      "Stir in heavy cream and fresh basil leaves until smooth.",
+      "Toss pasta into sauce with a splash of pasta water, finish with grated Parmesan."
+    ]
+  },
+  {
+    "id": 13,
+    "name": "Grilled Fish Tacos with Slaw",
+    "emoji": "🌮",
+    "prepTime": "20 mins",
+    "cuisine": "Mexican",
+    "protein": "Fish/Seafood",
+    "style": "Sandwich/Wrap",
+    "description": "Flaky seasoned white fish served in warm tortillas topped with crunchy lime-cilantro cabbage slaw and Chipotle crema.",
+    "ingredients": [
+      "2 White fish fillets (Cod or Tilapia)",
+      "1 tsp Cumin & chili powder",
+      "2 cups Shredded cabbage slaw",
+      "1 tbsp Lime juice",
+      "6 Small tortillas",
+      "Chipotle mayo"
+    ],
+    "instructions": [
+      "Season fish with cumin, chili powder, salt, and pepper.",
+      "Pan-sear fish in skillet for 3-4 minutes per side until flaky.",
+      "Toss cabbage slaw with lime juice and fresh cilantro.",
+      "Flake fish into warm tortillas, top with slaw, and drizzle with chipotle mayo."
+    ]
+  }
+]
