@@ -6,7 +6,9 @@
     "prepTime": "25 mins",
     "cuisine": "Asian",
     "protein": "Chicken",
-    "style": "Noodles",
+    "baseStyle": "Noodles",
+    "difficulty": "Medium",
+    "mood": "Spicy Kick",
     "description": "Stir-fried rice noodles with a sweet-savory tamarind sauce, tender chicken, scrambled egg, fresh bean sprouts, and roasted peanuts.",
     "ingredients": [
       "8 oz Rice noodles",
@@ -35,7 +37,9 @@
     "prepTime": "20 mins",
     "cuisine": "Mexican",
     "protein": "Beef",
-    "style": "Sandwich/Wrap",
+    "baseStyle": "Sandwich/Wrap",
+    "difficulty": "Easy",
+    "mood": "Feast / Hungry",
     "description": "Flavorful seasoned flank steak served in warm corn tortillas with diced pineapple, chopped onions, and fresh cilantro.",
     "ingredients": [
       "1 lb Flank steak (thinly sliced)",
@@ -61,7 +65,9 @@
     "prepTime": "25 mins",
     "cuisine": "Mediterranean",
     "protein": "Fish/Seafood",
-    "style": "Pasta",
+    "baseStyle": "Pasta",
+    "difficulty": "Medium",
+    "mood": "Date Night / Fancy",
     "description": "Pan-seared salmon fillets simmered in a velvety garlic, sun-dried tomato, and spinach cream sauce over penne.",
     "ingredients": [
       "2 Salmon fillets",
@@ -88,7 +94,9 @@
     "prepTime": "30 mins",
     "cuisine": "Asian",
     "protein": "Vegetarian/Tofu",
-    "style": "Rice",
+    "baseStyle": "Rice",
+    "difficulty": "Easy",
+    "mood": "Healthy & Clean",
     "description": "Crispy pan-fried tofu glazed in home-made teriyaki sauce, served over fluffy jasmine rice with steamed broccoli.",
     "ingredients": [
       "1 block Extra-firm tofu (pressed & cubed)",
@@ -115,7 +123,9 @@
     "prepTime": "15 mins",
     "cuisine": "Western",
     "protein": "Beef",
-    "style": "Sandwich/Wrap",
+    "baseStyle": "Sandwich/Wrap",
+    "difficulty": "Easy",
+    "mood": "Guilty Pleasure",
     "description": "Juicy seared beef patty topped with melted cheddar cheese, lettuce, tomato, pickles, and special sauce on a toasted brioche bun.",
     "ingredients": [
       "1/2 lb Ground beef (80/20 blend)",
@@ -140,7 +150,9 @@
     "prepTime": "35 mins",
     "cuisine": "Western",
     "protein": "Chicken",
-    "style": "Soup",
+    "baseStyle": "Soup",
+    "difficulty": "Easy",
+    "mood": "Comforting",
     "description": "Comforting classic soup brimming with shredded chicken, egg noodles, carrots, celery, and fresh herbs in a rich broth.",
     "ingredients": [
       "2 cups Shredded cooked chicken",
@@ -162,12 +174,14 @@
   },
   {
     "id": 7,
-    "name": "Greek Lemon Orzo Soup (Avgolemono)",
+    "name": "Greek Lemon Orzo Soup",
     "emoji": "🍋",
     "prepTime": "25 mins",
     "cuisine": "Mediterranean",
     "protein": "Chicken",
-    "style": "Soup",
+    "baseStyle": "Soup",
+    "difficulty": "Medium",
+    "mood": "Fresh & Light",
     "description": "Silky, velvety Greek soup combining tender shredded chicken, orzo pasta, and a bright lemon-egg broth.",
     "ingredients": [
       "5 cups Chicken broth",
@@ -193,7 +207,9 @@
     "prepTime": "20 mins",
     "cuisine": "Mexican",
     "protein": "Pork",
-    "style": "Rice",
+    "baseStyle": "Rice",
+    "difficulty": "Easy",
+    "mood": "Quick & Lazy",
     "description": "Crispy slow-cooked shredded pork served over cilantro-lime rice, black beans, corn salsa, and fresh avocado.",
     "ingredients": [
       "2 cups Crispy shredded pork carnitas",
@@ -217,7 +233,9 @@
     "prepTime": "20 mins",
     "cuisine": "Asian",
     "protein": "Fish/Seafood",
-    "style": "Noodles",
+    "baseStyle": "Noodles",
+    "difficulty": "Easy",
+    "mood": "Spicy Kick",
     "description": "A fiery, flavorful soup packed with ramen noodles, mixed seafood, aged kimchi, soft-boiled egg, and scallions.",
     "ingredients": [
       "1 pack Ramen noodles",
@@ -242,8 +260,10 @@
     "prepTime": "15 mins",
     "cuisine": "Mediterranean",
     "protein": "Vegetarian/Tofu",
-    "style": "Sandwich/Wrap",
-    "description": "Crispy chickpeas falafel balls tucked in warm pita pockets with diced cucumber, tomatoes, and creamy tahini sauce.",
+    "baseStyle": "Sandwich/Wrap",
+    "difficulty": "Easy",
+    "mood": "Healthy & Clean",
+    "description": "Crispy chickpea falafel balls tucked in warm pita pockets with diced cucumber, tomatoes, and creamy tahini sauce.",
     "ingredients": [
       "6-8 Prepared falafels (baked or fried)",
       "2 Warm pita pockets",
@@ -265,7 +285,9 @@
     "prepTime": "35 mins",
     "cuisine": "Asian",
     "protein": "Pork",
-    "style": "Rice",
+    "baseStyle": "Rice",
+    "difficulty": "Hard",
+    "mood": "Comforting",
     "description": "Crispy panko-breaded pork cutlet served alongside rich, savory Japanese curry sauce and warm steamed rice.",
     "ingredients": [
       "2 Boneless pork chops",
@@ -284,12 +306,14 @@
   },
   {
     "id": 12,
-    "name": "Creamy Tomato & Basil Pasta",
+    "name": "Creamy Tomato Basil Rigatoni",
     "emoji": "🍝",
     "prepTime": "20 mins",
     "cuisine": "Western",
     "protein": "Vegetarian/Tofu",
-    "style": "Pasta",
+    "baseStyle": "Pasta",
+    "difficulty": "Easy",
+    "mood": "Comforting",
     "description": "Rich tomato sauce folded with heavy cream, fresh basil, and garlic, tossed with al dente rigatoni pasta.",
     "ingredients": [
       "8 oz Rigatoni pasta",
@@ -313,7 +337,9 @@
     "prepTime": "20 mins",
     "cuisine": "Mexican",
     "protein": "Fish/Seafood",
-    "style": "Sandwich/Wrap",
+    "baseStyle": "Sandwich/Wrap",
+    "difficulty": "Medium",
+    "mood": "Fresh & Light",
     "description": "Flaky seasoned white fish served in warm tortillas topped with crunchy lime-cilantro cabbage slaw and Chipotle crema.",
     "ingredients": [
       "2 White fish fillets (Cod or Tilapia)",
@@ -328,6 +354,192 @@
       "Pan-sear fish in skillet for 3-4 minutes per side until flaky.",
       "Toss cabbage slaw with lime juice and fresh cilantro.",
       "Flake fish into warm tortillas, top with slaw, and drizzle with chipotle mayo."
+    ]
+  },
+  {
+    "id": 14,
+    "name": "Beef Bolognese Pappardelle",
+    "emoji": "🍝",
+    "prepTime": "45 mins",
+    "cuisine": "Western",
+    "protein": "Beef",
+    "baseStyle": "Pasta",
+    "difficulty": "Hard",
+    "mood": "Date Night / Fancy",
+    "description": "Slow-simmered rich beef ragù with tomatoes, aromatics, and red wine over broad ribbons of pappardelle pasta.",
+    "ingredients": [
+      "1 lb Ground beef",
+      "1 Medium onion, carrot, & celery stalk (finely diced)",
+      "1/2 cup Red wine",
+      "1 can (28oz) Whole peeled tomatoes",
+      "12 oz Pappardelle pasta",
+      "Parmesan cheese"
+    ],
+    "instructions": [
+      "Sauté diced onion, carrot, and celery in olive oil until soft.",
+      "Add ground beef, browning thoroughly while breaking up chunks.",
+      "Pour in red wine to deglaze, simmering until liquid reduces by half.",
+      "Crush tomatoes into the pot, lower heat, and simmer for 30 minutes.",
+      "Toss with cooked pappardelle and top with freshly grated Parmesan."
+    ]
+  },
+  {
+    "id": 15,
+    "name": "Chipotle Chicken Burrito",
+    "emoji": "🌯",
+    "prepTime": "20 mins",
+    "cuisine": "Mexican",
+    "protein": "Chicken",
+    "baseStyle": "Sandwich/Wrap",
+    "difficulty": "Easy",
+    "mood": "Feast / Hungry",
+    "description": "Massive flour tortilla stuffed with marinated grilled chicken, seasoned rice, pinto beans, shredded cheese, and salsa.",
+    "ingredients": [
+      "2 Marinated chicken thighs (grilled & chopped)",
+      "2 Large flour tortillas",
+      "1 cup Cooked rice",
+      "1/2 cup Pinto beans",
+      "1/2 cup Shredded Mexican cheese blend",
+      "Pico de gallo & guacamole"
+    ],
+    "instructions": [
+      "Grill chicken thighs until fully cooked, then chop into bite-sized pieces.",
+      "Warm flour tortillas to make them pliable.",
+      "Layer rice, beans, chicken, cheese, salsa, and guacamole in the center.",
+      "Fold in sides, roll tightly, and sear seam-down on a hot skillet for 1 minute."
+    ]
+  },
+  {
+    "id": 16,
+    "name": "Spicy Thai Basil Pork Stir-Fry",
+    "emoji": "🍲",
+    "prepTime": "15 mins",
+    "cuisine": "Asian",
+    "protein": "Pork",
+    "baseStyle": "Rice",
+    "difficulty": "Medium",
+    "mood": "Spicy Kick",
+    "description": "Classic Thai Pad Krapow featuring savory minced pork stir-fried with Thai basil, garlic, chilies, and a fried egg over rice.",
+    "ingredients": [
+      "1/2 lb Ground pork",
+      "1 cup Fresh Thai holy basil leaves",
+      "3 Thai bird's eye chilies (minced)",
+      "3 Garlic cloves (minced)",
+      "1 tbsp Soy sauce & 1 tbsp Oyster sauce",
+      "1 Egg",
+      "Steamed Jasmine rice"
+    ],
+    "instructions": [
+      "Pound garlic and chilies together into a coarse paste.",
+      "Stir-fry garlic chili paste in hot oil until fragrant (approx. 30 seconds).",
+      "Add ground pork, stir-frying until browned and cooked through.",
+      "Stir in soy sauce and oyster sauce, then remove from heat and toss in basil until wilted.",
+      "Fry an egg until edges are crisp and serve over pork and jasmine rice."
+    ]
+  },
+  {
+    "id": 17,
+    "name": "Greek Lemon Herb Chicken Skewers",
+    "emoji": "🍢",
+    "prepTime": "30 mins",
+    "cuisine": "Mediterranean",
+    "protein": "Chicken",
+    "baseStyle": "Rice",
+    "difficulty": "Medium",
+    "mood": "Fresh & Light",
+    "description": "Tender marinated chicken breast cubes grilled on skewers with bell peppers, onions, served over lemon rice and tzatziki.",
+    "ingredients": [
+      "1.5 lbs Chicken breast (cubed)",
+      "2 tbsp Olive oil, lemon juice, & oregano",
+      "1 Bell pepper & 1 Red onion (cut into chunks)",
+      "Wooden skewers",
+      "2 cups Cooked lemon rice",
+      "Tzatziki dip"
+    ],
+    "instructions": [
+      "Marinate chicken in olive oil, lemon juice, oregano, salt, and pepper for 15 minutes.",
+      "Thread alternating chicken, bell pepper, and onion onto skewers.",
+      "Grill skewers over high heat for 10-12 minutes, turning occasionally until cooked through.",
+      "Serve hot over lemon rice alongside cool tzatziki."
+    ]
+  },
+  {
+    "id": 18,
+    "name": "Miso Ramen with Crispy Tofu",
+    "emoji": "🍜",
+    "prepTime": "25 mins",
+    "cuisine": "Asian",
+    "protein": "Vegetarian/Tofu",
+    "baseStyle": "Soup",
+    "difficulty": "Medium",
+    "mood": "Quick & Lazy",
+    "description": "Rich savory miso broth poured over ramen noodles, topped with pan-seared crispy tofu, bok choy, and corn.",
+    "ingredients": [
+      "1 pack Ramen noodles",
+      "2 tbsp White miso paste",
+      "3 cups Vegetable broth",
+      "1/2 block Extra-firm tofu (pan-fried)",
+      "1 Baby bok choy (halved)",
+      "1/4 cup Sweet corn",
+      "Sesame oil"
+    ],
+    "instructions": [
+      "Whisk miso paste into warm vegetable broth until fully dissolved.",
+      "Boil ramen noodles and baby bok choy in broth for 3 minutes.",
+      "Pan-fry sliced tofu in sesame oil until golden brown on both sides.",
+      "Ladle soup and noodles into a bowl, arranging crispy tofu, bok choy, and corn on top."
+    ]
+  },
+  {
+    "id": 19,
+    "name": "Seafood Paella",
+    "emoji": "🥘",
+    "prepTime": "50 mins",
+    "cuisine": "Mediterranean",
+    "protein": "Fish/Seafood",
+    "baseStyle": "Rice",
+    "difficulty": "Hard",
+    "mood": "Feast / Hungry",
+    "description": "Authentic Spanish saffron rice cooked with shrimp, mussels, calamari, peas, and bell peppers in a wide pan.",
+    "ingredients": [
+      "1.5 cups Bomba or Arborio rice",
+      "1/2 lb Mixed seafood (shrimp, mussels, squid)",
+      "1 pinch Saffron threads dissolved in 3.5 cups fish stock",
+      "1 Red bell pepper (sliced)",
+      "1/2 cup Frozen peas",
+      "2 cloves Garlic & 1 diced tomato"
+    ],
+    "instructions": [
+      "Sauté bell pepper, garlic, and diced tomato in a wide paella pan with olive oil.",
+      "Add rice and stir to coat in oil for 2 minutes.",
+      "Pour in saffron fish stock; cook uncovered without stirring for 15 minutes.",
+      "Nestle mixed seafood and peas into the rice; cook 8 minutes longer until liquid absorbs and socarrat crust forms."
+    ]
+  },
+  {
+    "id": 20,
+    "name": "Loaded Nacho Platter",
+    "emoji": "🧀",
+    "prepTime": "15 mins",
+    "cuisine": "Mexican",
+    "protein": "Vegetarian/Tofu",
+    "baseStyle": "Sandwich/Wrap",
+    "difficulty": "Easy",
+    "mood": "Guilty Pleasure",
+    "description": "Crispy tortilla chips piled high with melted cheese, black beans, jalapenos, guacamole, and sour cream.",
+    "ingredients": [
+      "1 large bag Tortilla chips",
+      "2 cups Shredded Cheddar & Monterey Jack cheese",
+      "1 can Black beans (drained)",
+      "1/4 cup Pickled jalapeno slices",
+      "Fresh guacamole & sour cream",
+      "Diced tomatoes"
+    ],
+    "instructions": [
+      "Arrange tortilla chips on a baking sheet in an even layer.",
+      "Top with black beans, jalapenos, and a heavy layer of shredded cheese.",
+      "Bake at 400°F (200°C) for 8-10 minutes until cheese is completely melted and bubbly.",
+      "Top with scoops of guacamole, sour cream, and fresh diced tomatoes before serving."
     ]
   }
 ]

@@ -1,24 +1,25 @@
 /**
- * ThymeToEat Application Logic
+ * ThymeToEat - Application Logic
  */
 
 let recipes = [];
 let activeTab = 'ingredients';
 
-// DOM Elements
+// DOM Controls
 const cuisineSelect = document.getElementById('cuisineSelect');
 const proteinSelect = document.getElementById('proteinSelect');
 const styleSelect = document.getElementById('styleSelect');
+const difficultySelect = document.getElementById('difficultySelect');
+const moodSelect = document.getElementById('moodSelect');
 const findMealBtn = document.getElementById('findMealBtn');
 const surpriseBtn = document.getElementById('surpriseBtn');
 const resultContainer = document.getElementById('resultContainer');
 
-// Utility Helper
 function getRandomItem(array) {
     return array[Math.floor(Math.random() * array.length)];
 }
 
-// 1. Fetch JSON dataset on application startup
+// 1. Asynchronous Dataset Fetch
 async function loadRecipes() {
     try {
         const response = await fetch('recipes.json');
@@ -27,28 +28,30 @@ async function loadRecipes() {
         }
         recipes = await response.json();
         
-        // Render initial random meal on load
         if (recipes.length > 0) {
             renderCard({ recipe: getRandomItem(recipes), isFallback: false, matchedTraits: [] });
         }
     } catch (error) {
-        console.error('Error loading recipes dataset:', error);
+        console.error('Error fetching recipes.json:', error);
         resultContainer.innerHTML = `
             <div class="bg-red-50 text-red-700 rounded-2xl p-6 border border-red-200 text-center">
                 <i class="fa-solid fa-triangle-exclamation text-2xl mb-2"></i>
-                <p class="font-bold">Failed to load recipe library.</p>
-                <p class="text-xs mt-1">Please ensure you are serving files via a local server (e.g. Live Server) when using dynamic fetch().</p>
+                <p class="font-bold">Failed to load recipes dataset.</p>
+                <p class="text-xs mt-1">Make sure you are running a local server (e.g., Live Server) when serving files dynamically via fetch().</p>
             </div>
         `;
     }
 }
 
-// 2. Smart Fallback Search Logic
+// 2. Scoring & Matching Filter Engine
 function findMeal(forceRandom = false) {
     if (forceRandom) {
         cuisineSelect.value = 'Any';
         proteinSelect.value = 'Any';
         styleSelect.value = 'Any';
+        difficultySelect.value = 'Any';
+        moodSelect.value = 'Any';
+
         return {
             recipe: getRandomItem(recipes),
             isFallback: false,
@@ -56,71 +59,82 @@ function findMeal(forceRandom = false) {
         };
     }
 
-    const selectedCuisine = cuisineSelect.value;
-    const selectedProtein = proteinSelect.value;
-    const selectedStyle = styleSelect.value;
+    const filters = {
+        cuisine: cuisineSelect.value,
+        protein: proteinSelect.value,
+        baseStyle: styleSelect.value,
+        difficulty: difficultySelect.value,
+        mood: moodSelect.value
+    };
 
-    // Step 1: Exact Match (Matches all active criteria)
-    const exactMatches = recipes.filter(recipe => {
-        const matchCuisine = selectedCuisine === 'Any' || recipe.cuisine === selectedCuisine;
-        const matchProtein = selectedProtein === 'Any' || recipe.protein === selectedProtein;
-        const matchStyle = selectedStyle === 'Any' || recipe.style === selectedStyle;
-        return matchCuisine && matchProtein && matchStyle;
+    const activeFilters = Object.entries(filters).filter(([_, val]) => val !== 'Any');
+    const totalActiveCriteria = activeFilters.length;
+
+    const scoredRecipes = recipes.map(recipe => {
+        let score = 0;
+        const matchedTraits = [];
+
+        activeFilters.forEach(([key, val]) => {
+            if (recipe[key] === val) {
+                score++;
+                matchedTraits.push(val);
+            }
+        });
+
+        return { recipe, score, matchedTraits };
     });
 
+    const exactMatches = scoredRecipes.filter(item => item.score === totalActiveCriteria);
+
     if (exactMatches.length > 0) {
+        const selectedMatch = getRandomItem(exactMatches);
         return {
-            recipe: getRandomItem(exactMatches),
+            recipe: selectedMatch.recipe,
             isFallback: false,
             matchedTraits: []
         };
     }
 
-    // Step 2: Fallback Logic - Search for dishes matching 2 out of 3 criteria
-    // Only runs if at least 2 or 3 non-"Any" dropdowns were explicitly set
-    const activeFiltersCount = [selectedCuisine, selectedProtein, selectedStyle].filter(val => val !== 'Any').length;
+    const sortedCandidates = scoredRecipes.sort((a, b) => b.score - a.score);
+    const highestScore = sortedCandidates[0]?.score || 0;
 
-    if (activeFiltersCount >= 2) {
-        const fallbackCandidates = [];
+    if (highestScore > 0) {
+        const topCandidates = sortedCandidates.filter(item => item.score === highestScore);
+        const selectedFallback = getRandomItem(topCandidates);
 
-        recipes.forEach(recipe => {
-            const matches = [];
-            if (selectedCuisine !== 'Any' && recipe.cuisine === selectedCuisine) matches.push(recipe.cuisine);
-            if (selectedProtein !== 'Any' && recipe.protein === selectedProtein) matches.push(recipe.protein);
-            if (selectedStyle !== 'Any' && recipe.style === selectedStyle) matches.push(recipe.style);
-
-            // Exactly 2 out of 3 matches found
-            if (matches.length === 2) {
-                fallbackCandidates.push({
-                    recipe,
-                    matchedTraits: matches
-                });
-            }
-        });
-
-        if (fallbackCandidates.length > 0) {
-            const pickedFallback = getRandomItem(fallbackCandidates);
-            return {
-                recipe: pickedFallback.recipe,
-                isFallback: true,
-                matchedTraits: pickedFallback.matchedTraits
-            };
-        }
+        return {
+            recipe: selectedFallback.recipe,
+            isFallback: true,
+            matchedTraits: selectedFallback.matchedTraits
+        };
     }
 
-    // Step 3: No exact or partial match found
     return { recipe: null, isFallback: false, matchedTraits: [] };
 }
 
-// 3. Card Template Renderer
+// Helper: Difficulty Badge Styling
+function getDifficultyBadgeClass(difficulty) {
+    switch (difficulty) {
+        case 'Easy':
+            return 'bg-emerald-500/20 text-emerald-100 border-emerald-400/30';
+        case 'Medium':
+            return 'bg-amber-500/20 text-amber-100 border-amber-400/30';
+        case 'Hard':
+            return 'bg-rose-500/20 text-rose-100 border-rose-400/30';
+        default:
+            return 'bg-slate-500/20 text-slate-100 border-slate-400/30';
+    }
+}
+
+// 3. UI Template Card Renderer
 function renderCard({ recipe, isFallback, matchedTraits }) {
     if (!recipe) {
         resultContainer.innerHTML = `
             <div class="bg-white rounded-3xl p-8 border border-slate-200 text-center shadow-lg animate-pop-in">
                 <div class="text-5xl mb-4">🔍</div>
                 <h3 class="text-xl font-bold text-slate-800 mb-2">No match found</h3>
-                <p class="text-slate-500 max-w-md mx-auto mb-6">We couldn't find a meal matching your combination of choices. Try broadening your selections!</p>
-                <button id="noMatchSurpriseBtn" class="bg-brand-600 hover:bg-brand-700 text-white font-semibold py-2.5 px-6 rounded-xl transition-all">
+                <p class="text-slate-500 max-w-md mx-auto mb-6">We couldn't find a close match for your selection combination. Try broadening your criteria!</p>
+                <button id="noMatchSurpriseBtn" class="bg-brand-600 hover:bg-brand-700 text-white font-semibold py-2.5 px-6 rounded-xl transition-all cursor-pointer">
                     Surprise Me Instead
                 </button>
             </div>
@@ -131,17 +145,17 @@ function renderCard({ recipe, isFallback, matchedTraits }) {
         return;
     }
 
-    const matchedTraitsText = matchedTraits.join(' & ');
+    const matchedTraitsText = matchedTraits.join(', ');
 
     resultContainer.innerHTML = `
         <div class="bg-white rounded-3xl overflow-hidden shadow-2xl border border-slate-100 animate-pop-in">
             
             ${isFallback ? `
-                <!-- Smart Fallback Banner -->
+                <!-- Fallback Banner -->
                 <div class="bg-amber-500 text-slate-900 px-6 py-3 font-medium text-xs sm:text-sm flex flex-col sm:flex-row items-center justify-between gap-2 border-b border-amber-600/20">
                     <div class="flex items-center gap-2 text-center sm:text-left">
                         <i class="fa-solid fa-circle-info text-slate-900"></i>
-                        <span>No exact match found for all filters, but here is a close match based on <strong>${matchedTraitsText}</strong>!</span>
+                        <span>No exact 5/5 match found, but here is a close match based on <strong>${matchedTraitsText}</strong>!</span>
                     </div>
                     <button id="fallbackSurpriseBtn" class="underline text-slate-900 hover:text-slate-800 font-bold whitespace-nowrap cursor-pointer">
                         Surprise Me Instead
@@ -149,8 +163,8 @@ function renderCard({ recipe, isFallback, matchedTraits }) {
                 </div>
             ` : ''}
 
-            <!-- Top Card Hero Banner -->
-            <div class="bg-gradient-to-r from-emerald-500 via-brand-500 to-teal-600 p-6 sm:p-8 text-white relative">
+            <!-- Card Banner -->
+            <div class="bg-gradient-to-r from-emerald-600 via-brand-600 to-teal-700 p-6 sm:p-8 text-white relative">
                 <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                     <div class="flex items-center space-x-4">
                         <div class="w-16 h-16 sm:w-20 sm:h-20 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center text-4xl sm:text-5xl shadow-inner shrink-0">
@@ -167,6 +181,12 @@ function renderCard({ recipe, isFallback, matchedTraits }) {
 
                 <!-- Recipe Meta Tag Pills -->
                 <div class="flex flex-wrap gap-2 mt-6">
+                    <span class="px-3 py-1 text-xs font-semibold rounded-full border ${getDifficultyBadgeClass(recipe.difficulty)}">
+                        ⚡ ${recipe.difficulty}
+                    </span>
+                    <span class="px-3 py-1 bg-indigo-500/20 text-indigo-100 font-semibold text-xs rounded-full border border-indigo-400/30">
+                        ✨ ${recipe.mood}
+                    </span>
                     <span class="px-3 py-1 bg-white/20 backdrop-blur-md text-white font-medium text-xs rounded-full border border-white/20">
                         🌍 ${recipe.cuisine}
                     </span>
@@ -174,16 +194,16 @@ function renderCard({ recipe, isFallback, matchedTraits }) {
                         🥩 ${recipe.protein}
                     </span>
                     <span class="px-3 py-1 bg-white/20 backdrop-blur-md text-white font-medium text-xs rounded-full border border-white/20">
-                        🍽️️ ${recipe.style}
+                        🍽️ ${recipe.baseStyle}
                     </span>
                 </div>
             </div>
 
-            <!-- Description & Tab Controls -->
+            <!-- Recipe Description & Tabs -->
             <div class="p-6 sm:p-8">
                 <p class="text-slate-600 leading-relaxed mb-6 font-normal">${recipe.description}</p>
 
-                <!-- Toggle Navigation Tabs -->
+                <!-- Navigation Tabs -->
                 <div class="flex border-b border-slate-200 mb-6">
                     <button id="tabIngredientsBtn" class="flex-1 pb-3 text-sm font-bold text-center border-b-2 ${activeTab === 'ingredients' ? 'border-brand-500 text-brand-600' : 'border-transparent text-slate-400 hover:text-slate-600'} transition-all cursor-pointer">
                         <i class="fa-solid fa-basket-shopping mr-2"></i> Ingredients
@@ -193,27 +213,38 @@ function renderCard({ recipe, isFallback, matchedTraits }) {
                     </button>
                 </div>
 
-                <!-- Ingredients List Panel -->
-                <div id="ingredientsPanel" class="${activeTab === 'ingredients' ? 'block' : 'hidden'} space-y-2">
+                <!-- Interactive Ingredients List Panel -->
+                <div id="ingredientsPanel" class="${activeTab === 'ingredients' ? 'block' : 'hidden'} space-y-3">
+                    <div class="flex justify-between items-center mb-1 px-1">
+                        <span class="text-xs text-slate-400 font-medium">Click ingredients to check off as you prep</span>
+                        <button id="resetIngredientsBtn" class="text-xs font-semibold text-brand-600 hover:text-brand-700 hover:underline flex items-center gap-1 cursor-pointer transition-colors">
+                            <i class="fa-solid fa-arrow-rotate-left text-[10px]"></i> Reset Checklist
+                        </button>
+                    </div>
                     <ul class="grid grid-cols-1 md:grid-cols-2 gap-2.5">
-                        ${recipe.ingredients.map(ing => `
-                            <li class="flex items-center gap-3 p-3 bg-slate-50 rounded-xl text-xs sm:text-sm text-slate-700 font-medium">
-                                <i class="fa-solid fa-check text-brand-500 text-xs"></i>
-                                <span>${ing}</span>
+                        ${recipe.ingredients.map((ing, idx) => `
+                            <li id="ing-item-${idx}" onclick="toggleIngredient(${idx})" class="ingredient-row flex items-center gap-3 p-3 bg-slate-50 hover:bg-slate-100 rounded-xl text-xs sm:text-sm text-slate-700 font-medium transition-all duration-200 cursor-pointer select-none border border-slate-200/50">
+                                <input type="checkbox" id="ing-check-${idx}" class="w-4 h-4 rounded text-brand-600 focus:ring-brand-500 border-slate-300 cursor-pointer pointer-events-none transition-transform" onclick="event.stopPropagation()">
+                                <span id="ing-text-${idx}" class="transition-all duration-200">${ing}</span>
                             </li>
                         `).join('')}
                     </ul>
                 </div>
 
-                <!-- Instructions Panel -->
+                <!-- Interactive Cooking Progress Panel -->
                 <div id="instructionsPanel" class="${activeTab === 'instructions' ? 'block' : 'hidden'}">
-                    <ol class="space-y-4">
+                    <div class="mb-3 px-1">
+                        <span class="text-xs text-slate-400 font-medium">Click a step to toggle its completion state</span>
+                    </div>
+                    <ol class="space-y-3">
                         ${recipe.instructions.map((step, idx) => `
-                            <li class="flex gap-4 p-3 rounded-xl hover:bg-slate-50 transition-colors">
-                                <span class="flex-shrink-0 w-7 h-7 bg-brand-100 text-brand-700 font-bold rounded-full flex items-center justify-center text-xs">
+                            <li id="step-item-${idx}" onclick="toggleStep(${idx})" class="step-row flex gap-4 p-3.5 rounded-xl border border-slate-200/60 bg-white hover:bg-slate-50 transition-all duration-200 cursor-pointer select-none group">
+                                <span id="step-badge-${idx}" class="flex-shrink-0 w-7 h-7 bg-brand-100 text-brand-700 font-bold rounded-full flex items-center justify-center text-xs transition-colors group-hover:scale-105">
                                     ${idx + 1}
                                 </span>
-                                <p class="text-xs sm:text-sm text-slate-700 leading-relaxed pt-0.5">${step}</p>
+                                <p id="step-text-${idx}" class="text-xs sm:text-sm text-slate-700 leading-relaxed pt-0.5 transition-all duration-200">
+                                    ${step}
+                                </p>
                             </li>
                         `).join('')}
                     </ol>
@@ -222,9 +253,10 @@ function renderCard({ recipe, isFallback, matchedTraits }) {
         </div>
     `;
 
-    // Attach dynamic listeners inside rendered card
+    // Tab Listeners
     document.getElementById('tabIngredientsBtn').addEventListener('click', () => switchTab('ingredients'));
     document.getElementById('tabInstructionsBtn').addEventListener('click', () => switchTab('instructions'));
+    document.getElementById('resetIngredientsBtn').addEventListener('click', resetIngredients);
 
     if (isFallback) {
         document.getElementById('fallbackSurpriseBtn').addEventListener('click', () => {
@@ -233,7 +265,56 @@ function renderCard({ recipe, isFallback, matchedTraits }) {
     }
 }
 
-// Tab Switching Handler
+// 4. Interactive Checklist Logic
+function toggleIngredient(index) {
+    const row = document.getElementById(`ing-item-${index}`);
+    const checkbox = document.getElementById(`ing-check-${index}`);
+    const text = document.getElementById(`ing-text-${index}`);
+
+    if (!checkbox || !text || !row) return;
+
+    checkbox.checked = !checkbox.checked;
+
+    if (checkbox.checked) {
+        text.classList.add('line-through', 'text-slate-400');
+        row.classList.add('opacity-50', 'bg-slate-100/60');
+    } else {
+        text.classList.remove('line-through', 'text-slate-400');
+        row.classList.remove('opacity-50', 'bg-slate-100/60');
+    }
+}
+
+function resetIngredients() {
+    const checkboxes = document.querySelectorAll('[id^="ing-check-"]');
+    checkboxes.forEach((cb, idx) => {
+        if (cb.checked) {
+            toggleIngredient(idx);
+        }
+    });
+}
+
+// 5. Interactive Step Progress Logic
+function toggleStep(index) {
+    const row = document.getElementById(`step-item-${index}`);
+    const badge = document.getElementById(`step-badge-${index}`);
+    const text = document.getElementById(`step-text-${index}`);
+
+    if (!row || !badge || !text) return;
+
+    const isCompleted = row.classList.contains('bg-slate-100/70');
+
+    if (!isCompleted) {
+        row.classList.add('bg-slate-100/70', 'opacity-60', 'border-slate-300');
+        text.classList.add('line-through', 'text-slate-400');
+        badge.className = "flex-shrink-0 w-7 h-7 bg-slate-200 text-slate-500 font-bold rounded-full flex items-center justify-center text-xs transition-colors";
+    } else {
+        row.classList.remove('bg-slate-100/70', 'opacity-60', 'border-slate-300');
+        text.classList.remove('line-through', 'text-slate-400');
+        badge.className = "flex-shrink-0 w-7 h-7 bg-brand-100 text-brand-700 font-bold rounded-full flex items-center justify-center text-xs transition-colors";
+    }
+}
+
+// Tab Switching
 function switchTab(tabName) {
     activeTab = tabName;
     const ingredientsPanel = document.getElementById('ingredientsPanel');
@@ -269,5 +350,5 @@ surpriseBtn.addEventListener('click', () => {
     renderCard(result);
 });
 
-// Initialize application
+// App Startup
 document.addEventListener('DOMContentLoaded', loadRecipes);
