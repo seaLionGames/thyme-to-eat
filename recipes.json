@@ -1,6 +1,219 @@
 [
   {
     "id": 1,
+    "name": "Hainanese Chicken Rice",
+    "emoji": "🐔",
+    "prepTime": "45 mins",
+    "course": "Main Course",
+    "cuisine": "Asian",
+    "protein": "Chicken",
+    "baseStyle": "Rice",
+    "difficulty": "Medium",
+    "mood": "Comforting",
+    "description": "Authentic poached chicken served over fragrant rice cooked in chicken fat, garlic, ginger, and pandan leaves, accompanied by red chili garlic dip and ginger scallion oil.",
+    "ingredients": [
+      "1 Whole chicken (about 3.5 lbs)",
+      "2 cups Jasmine rice (rinsed & drained)",
+      "3 Pandan leaves (knotted)",
+      "1/4 cup Rendered chicken fat or vegetable oil",
+      "6 cloves Garlic & 2 knobs Ginger (minced)",
+      "1 tsp Sesame oil",
+      "Garlic chili sauce, ginger scallion oil & dark soy sauce"
+    ],
+    "instructions": [
+      "Poach whole chicken with smashed ginger and scallions in boiling water for 35 minutes; plunge into ice water to set gelatinous skin.",
+      "Sauté minced garlic, ginger, and chicken fat in a pan; add rinsed Jasmine rice and toast lightly.",
+      "Transfer rice to cooker, cook using chicken poaching broth and knotted pandan leaves.",
+      "Slice poached chicken, rub skin with sesame oil, and serve over rice with chili garlic sauce and ginger oil."
+    ]
+  },
+  {
+    "id": 2,
+    "name": "Singapore Chilli Crab",
+    "emoji": "🦀",
+    "prepTime": "35 mins",
+    "course": "Main Course",
+    "cuisine": "Asian",
+    "protein": "Fish/Seafood",
+    "baseStyle": "Seafood Special",
+    "difficulty": "Hard",
+    "mood": "Feast / Hungry",
+    "description": "Sweet, savory, and mildly spicy mud crab stir-fried in a rich tomato-chili egg gravy, served with golden fried mantou buns.",
+    "ingredients": [
+      "2 lbs Fresh Mud crab or Dungeness crab (cleaned & quartered)",
+      "4 tbsp Chili paste (shallots, garlic, red chilies, ginger)",
+      "1/2 cup Tomato ketchup & 3 tbsp Sweet chili sauce",
+      "1 tbsp Yellow soybean paste (Taucu)",
+      "2 Eggs (beaten)",
+      "Deep-fried Mantou buns"
+    ],
+    "instructions": [
+      "Sauté blended chili paste, garlic, and ginger in a hot wok until fragrant.",
+      "Add tomato ketchup, chili sauce, soybean paste, and water to build gravy.",
+      "Add crab pieces, cover, and simmer for 10 minutes until cooked through.",
+      "Whisk in beaten eggs off heat to create silky egg ribbons in the gravy.",
+      "Serve hot with golden fried mantou buns for dipping."
+    ]
+  },
+  {
+    "id": 3,
+    "name": "Authentic Nasi Lemak",
+    "emoji": "🍱",
+    "prepTime": "30 mins",
+    "course": "Main Course",
+    "cuisine": "Asian",
+    "protein": "Chicken",
+    "baseStyle": "Rice",
+    "difficulty": "Medium",
+    "mood": "Comforting",
+    "description": "Fragrant coconut rice steamed with pandan leaves, served with slow-cooked anchovy sambal, fried peanuts, hard-boiled egg, and fried chicken.",
+    "ingredients": [
+      "2 cups Jasmine rice cooked in 1/2 cup coconut milk & pandan",
+      "1/2 cup Sambal paste (chili, shallots, tamarind, belacan)",
+      "1/2 cup Crispy fried anchovies (Ikan Bilis) & roasted peanuts",
+      "2 Hard-boiled eggs (halved)",
+      "1 Cucumber (sliced)",
+      "Crispy fried chicken cutlets"
+    ],
+    "instructions": [
+      "Cook rice with coconut milk, water, salt, lemongrass, and pandan leaves in a rice cooker.",
+      "Fry anchovies and peanuts in oil until golden brown and crispy.",
+      "Slow-cook blended sambal paste with tamarind juice and sugar until oil separates.",
+      "Assemble coconut rice mound on banana leaf with sambal, anchovies, peanuts, cucumber, boiled egg, and fried chicken."
+    ]
+  },
+  {
+    "id": 4,
+    "name": "Singapore Katong Laksa",
+    "emoji": "🍜",
+    "prepTime": "30 mins",
+    "course": "Main Course",
+    "cuisine": "Asian",
+    "protein": "Fish/Seafood",
+    "baseStyle": "Noodles",
+    "difficulty": "Medium",
+    "mood": "Spicy Kick",
+    "description": "Rich, spicy coconut broth infused with dried shrimp and laksa herbs, poured over cut rice vermicelli, plump prawns, and fish cakes.",
+    "ingredients": [
+      "8 oz Thick rice vermicelli noodles (cut into short strands)",
+      "1 cup Coconut milk & 2 cups Prawn broth",
+      "3 tbsp Laksa spice paste (dried shrimp, galangal, lemongrass, chilies)",
+      "8 Plump prawns & sliced fish cakes",
+      "Fried tofu puffs (Tau Pok)",
+      "Finely chopped laksa leaves (Vietnamese coriander)"
+    ],
+    "instructions": [
+      "Stir-fry laksa paste in oil until aromatic; add prawn stock, coconut milk, and tofu puffs.",
+      "Simmer broth gently and poach prawns and sliced fish cakes directly in the soup.",
+      "Place short rice noodles into bowls, ladle boiling coconut broth over top.",
+      "Garnish with chopped laksa leaves and serve with a spoon."
+    ]
+  },
+  {
+    "id": 5,
+    "name": "Assorted Dim Sum Basket",
+    "emoji": "🥟",
+    "prepTime": "25 mins",
+    "course": "Starter / Appetizer",
+    "cuisine": "Asian",
+    "protein": "Pork",
+    "baseStyle": "Small Bites / Dim Sum",
+    "difficulty": "Medium",
+    "mood": "Feast / Hungry",
+    "description": "Traditional bamboo basket filled with steamed pork and shrimp Shumai, translucent Har Gow dumplings, and fluffy Char Siu buns.",
+    "ingredients": [
+      "6 Steamed Pork & Shrimp Shumai",
+      "6 Har Gow Shrimp Dumplings",
+      "2 Fluffy Char Siu BBQ Pork Buns",
+      "Chili oil & black vinegar with ginger"
+    ],
+    "instructions": [
+      "Line bamboo steamer tiers with parchment paper.",
+      "Arrange dumplings and buns evenly inside steamer.",
+      "Steam over boiling water for 8-10 minutes until piping hot.",
+      "Serve directly in bamboo basket alongside chili oil and black vinegar."
+    ]
+  },
+  {
+    "id": 6,
+    "name": "Cantonese Char Siu",
+    "emoji": "🥓",
+    "prepTime": "40 mins",
+    "course": "Main Course",
+    "cuisine": "Asian",
+    "protein": "Pork",
+    "baseStyle": "Roast / Barbecue Meat",
+    "difficulty": "Medium",
+    "mood": "Guilty Pleasure",
+    "description": "Savory-sweet Cantonese roasted pork collar glazed with hoisin, honey, five-spice, and red fermented bean curd.",
+    "ingredients": [
+      "1.5 lbs Pork collar or shoulder (cut into long strips)",
+      "2 tbsp Hoisin sauce & 1 tbsp Oyster sauce",
+      "1 tbsp Honey & 1 tbsp Maltose",
+      "1/2 tsp Chinese five-spice powder",
+      "1 tbsp Shaoxing wine"
+    ],
+    "instructions": [
+      "Marinate pork strips in hoisin, oyster sauce, five-spice, and Shaoxing wine for 4 hours.",
+      "Roast at 400°F (200°C) for 25 minutes, turning once.",
+      "Baste heavily with honey glaze and broil for 3 minutes until charred at edges.",
+      "Slice and serve over steamed white rice."
+    ]
+  },
+  {
+    "id": 7,
+    "name": "Crispy Siu Yuk (Roast Pork Belly)",
+    "emoji": "🍖",
+    "prepTime": "50 mins",
+    "course": "Main Course",
+    "cuisine": "Asian",
+    "protein": "Pork",
+    "baseStyle": "Roast / Barbecue Meat",
+    "difficulty": "Hard",
+    "mood": "Guilty Pleasure",
+    "description": "Crispy Cantonese roasted pork belly with crunchy, blistered crackling skin and tender, seasoned meat.",
+    "ingredients": [
+      "2 lbs Pork belly block with skin intact",
+      "1 tbsp Shaoxing rice wine",
+      "1 tsp Chinese five-spice powder",
+      "1 cup Coarse sea salt (for top crust)",
+      "English mustard for serving"
+    ],
+    "instructions": [
+      "Prick skin thoroughly with sharp needles; dry skin in refrigerator overnight.",
+      "Season meat side with five-spice and Shaoxing wine.",
+      "Cover skin with salt crust and bake at 375°F (190°C) for 45 minutes.",
+      "Remove salt crust and blast at 450°F (230°C) for 15 minutes until skin crackles into crispy blisters."
+    ]
+  },
+  {
+    "id": 8,
+    "name": "Chee Cheong Fun",
+    "emoji": "🥢",
+    "prepTime": "15 mins",
+    "course": "Starter / Appetizer",
+    "cuisine": "Asian",
+    "protein": "Vegetarian/Tofu",
+    "baseStyle": "Small Bites / Dim Sum",
+    "difficulty": "Easy",
+    "mood": "Quick & Lazy",
+    "description": "Steamed rolled rice noodle sheets served with sweet dark sauce, chili paste, toasted sesame seeds, and fried shallots.",
+    "ingredients": [
+      "4 Plain steamed rice noodle rolls",
+      "2 tbsp Sweet dark soy sauce",
+      "1 tbsp Chili paste & sesame oil",
+      "1 tbsp Toasted sesame seeds",
+      "2 tbsp Crunchy fried shallots"
+    ],
+    "instructions": [
+      "Steam rice noodle rolls for 5 minutes until soft.",
+      "Slice into bite-sized cylinders and arrange on a plate.",
+      "Drizzle with sweet dark soy, chili paste, and sesame oil.",
+      "Garnish with toasted sesame seeds and fried shallots."
+    ]
+  },
+  {
+    "id": 9,
     "name": "Classic Pad Thai",
     "emoji": "🍜",
     "prepTime": "25 mins",
@@ -10,7 +223,7 @@
     "baseStyle": "Noodles",
     "difficulty": "Medium",
     "mood": "Spicy Kick",
-    "description": "Stir-fried rice noodles with a sweet-savory tamarind sauce, tender chicken, scrambled egg, fresh bean sprouts, and roasted peanuts.",
+    "description": "Stir-fried rice noodles with sweet-savory tamarind sauce, tender chicken, scrambled egg, bean sprouts, and roasted peanuts.",
     "ingredients": [
       "8 oz Rice noodles",
       "200g Chicken breast (sliced)",
@@ -32,35 +245,65 @@
     ]
   },
   {
-    "id": 2,
-    "name": "Spaghetti Carbonara",
-    "emoji": "🍝",
+    "id": 10,
+    "name": "Pad See Ew",
+    "emoji": "🥢",
     "prepTime": "20 mins",
     "course": "Main Course",
-    "cuisine": "Western",
-    "protein": "Pork",
-    "baseStyle": "Pasta",
-    "difficulty": "Medium",
-    "mood": "Comforting",
-    "description": "Classic Roman pasta with crispy guanciale or pancetta, tossed with egg yolks, grated Pecorino Romano, and cracked black pepper.",
+    "cuisine": "Asian",
+    "protein": "Beef",
+    "baseStyle": "Noodles",
+    "difficulty": "Easy",
+    "mood": "Quick & Lazy",
+    "description": "Wide flat rice noodles stir-fried in sweet dark soy sauce with tender beef, egg, and Chinese broccoli.",
     "ingredients": [
-      "8 oz Spaghetti",
-      "100g Pancetta or Guanciale (cubed)",
-      "2 Large egg yolks + 1 whole egg",
-      "3/4 cup Pecorino Romano (freshly grated)",
-      "Freshly cracked black pepper",
-      "Salt for pasta water"
+      "8 oz Wide flat rice noodles",
+      "150g Flank steak (thinly sliced)",
+      "2 cups Chinese broccoli (Gai Lan)",
+      "2 tbsp Dark sweet soy sauce",
+      "1 tbsp Soy sauce & 1 tbsp Oyster sauce",
+      "2 Eggs",
+      "2 cloves Garlic (minced)"
     ],
     "instructions": [
-      "Boil spaghetti in salted water until al dente; reserve 1/2 cup pasta water.",
-      "Crisp pancetta in a skillet over medium heat until golden; remove from heat.",
-      "Whisk eggs and Pecorino Romano together in a bowl with plenty of black pepper.",
-      "Toss hot pasta into the skillet with pancetta, then quickly stir in the egg mixture off heat.",
-      "Add pasta water as needed to create a glossy, creamy emulsion."
+      "Sear beef in a scorching hot wok with oil for 2 minutes; set aside.",
+      "Sauté minced garlic and Chinese broccoli stems until crisp-tender.",
+      "Push veggies aside, scramble eggs, then toss in wide rice noodles.",
+      "Pour dark soy sauce, light soy sauce, and oyster sauce over noodles.",
+      "Stir-fry on high heat to sear noodles with a subtle char, then toss in beef and broccoli leaves."
     ]
   },
   {
-    "id": 3,
+    "id": 11,
+    "name": "Spicy Thai Basil Pork (Pad Krapow)",
+    "emoji": "🍲",
+    "prepTime": "15 mins",
+    "course": "Main Course",
+    "cuisine": "Asian",
+    "protein": "Pork",
+    "baseStyle": "Rice",
+    "difficulty": "Medium",
+    "mood": "Spicy Kick",
+    "description": "Classic Thai street food featuring minced pork stir-fried with Thai holy basil, garlic, chilies, and a fried egg over Jasmine rice.",
+    "ingredients": [
+      "1/2 lb Ground pork",
+      "1 cup Fresh Thai holy basil leaves",
+      "3 Thai bird's eye chilies (minced)",
+      "3 Garlic cloves (minced)",
+      "1 tbsp Soy sauce & 1 tbsp Oyster sauce",
+      "1 Egg",
+      "Steamed Jasmine rice"
+    ],
+    "instructions": [
+      "Pound garlic and chilies together into a coarse paste.",
+      "Stir-fry garlic chili paste in hot oil until fragrant (approx. 30 seconds).",
+      "Add ground pork, stir-frying until browned and cooked through.",
+      "Stir in soy sauce and oyster sauce, then remove from heat and toss in basil until wilted.",
+      "Fry an egg until edges are crisp and serve over pork and jasmine rice."
+    ]
+  },
+  {
+    "id": 12,
     "name": "Authentic Pork Tonkotsu Ramen",
     "emoji": "🍜",
     "prepTime": "40 mins",
@@ -89,89 +332,92 @@
     ]
   },
   {
-    "id": 4,
-    "name": "Pad See Ew",
-    "emoji": "🥢",
+    "id": 13,
+    "name": "Spicy Seafood Kimchi Ramen",
+    "emoji": "🍜",
     "prepTime": "20 mins",
     "course": "Main Course",
     "cuisine": "Asian",
-    "protein": "Beef",
+    "protein": "Fish/Seafood",
     "baseStyle": "Noodles",
     "difficulty": "Easy",
-    "mood": "Quick & Lazy",
-    "description": "Popular Thai street food with wide flat rice noodles stir-fried in sweet dark soy sauce with tender beef, egg, and Chinese broccoli.",
+    "mood": "Spicy Kick",
+    "description": "Fiery Korean soup packed with ramen noodles, mixed seafood, aged kimchi, soft-boiled egg, and scallions.",
     "ingredients": [
-      "8 oz Wide flat rice noodles",
-      "150g Flank steak (thinly sliced)",
-      "2 cups Chinese broccoli (Gai Lan)",
-      "2 tbsp Dark sweet soy sauce",
-      "1 tbsp Soy sauce & 1 tbsp Oyster sauce",
-      "2 Eggs",
-      "2 cloves Garlic (minced)"
+      "1 pack Ramen noodles",
+      "150g Mixed seafood (shrimp, squid, mussels)",
+      "1/2 cup Aged kimchi (chopped)",
+      "3 cups Dashi or vegetable broth",
+      "1 tbsp Gochujang (Korean chili paste)",
+      "1 Soft-boiled egg",
+      "Green onions"
     ],
     "instructions": [
-      "Sear beef in a scorching hot wok with oil for 2 minutes; set aside.",
-      "Sauté minced garlic and Chinese broccoli stems until crisp-tender.",
-      "Push veggies aside, scramble eggs, then toss in wide rice noodles.",
-      "Pour dark soy sauce, light soy sauce, and oyster sauce over noodles.",
-      "Stir-fry on high heat to sear noodles with a subtle char, then toss in beef and broccoli leaves."
+      "Bring broth to a simmer with chopped kimchi and gochujang paste.",
+      "Add ramen noodles and seafood mix to the boiling broth.",
+      "Cook for 3-4 minutes until noodles are chewy and seafood is cooked through.",
+      "Transfer to a bowl, top with a soft-boiled egg half and sliced green onions."
     ]
   },
   {
-    "id": 5,
-    "name": "Assorted Dim Sum",
-    "emoji": "🥟",
+    "id": 14,
+    "name": "Teriyaki Tofu Rice Bowl",
+    "emoji": "🍱",
     "prepTime": "30 mins",
-    "course": "Starter / Appetizer",
+    "course": "Main Course",
+    "cuisine": "Asian",
+    "protein": "Vegetarian/Tofu",
+    "baseStyle": "Rice",
+    "difficulty": "Easy",
+    "mood": "Healthy & Clean",
+    "description": "Crispy pan-fried tofu glazed in homemade teriyaki sauce, served over fluffy jasmine rice with steamed broccoli.",
+    "ingredients": [
+      "1 block Extra-firm tofu (pressed & cubed)",
+      "2 tbsp Cornstarch",
+      "2 cups Cooked Jasmine rice",
+      "1/4 cup Soy sauce",
+      "2 tbsp Honey or maple syrup",
+      "1 tbsp Mirin",
+      "1 cup Steamed broccoli florets",
+      "Sesame seeds for garnish"
+    ],
+    "instructions": [
+      "Toss cubed tofu in cornstarch until lightly coated.",
+      "Pan-fry tofu in vegetable oil over medium-high heat until golden crisp on all sides (approx. 8-10 mins).",
+      "Whisk soy sauce, honey, mirin, and 1 tbsp water together.",
+      "Pour teriyaki sauce over the crispy tofu; simmer for 2 minutes until glossy and thick.",
+      "Serve tofu over warm jasmine rice with broccoli, garnished with sesame seeds."
+    ]
+  },
+  {
+    "id": 15,
+    "name": "Pork Tonkatsu Curry",
+    "emoji": "🍛",
+    "prepTime": "35 mins",
+    "course": "Main Course",
     "cuisine": "Asian",
     "protein": "Pork",
-    "baseStyle": "Sandwich/Wrap",
-    "difficulty": "Medium",
-    "mood": "Feast / Hungry",
-    "description": "A festive basket featuring steamed pork & shrimp Shumai, translucent Har Gow shrimp dumplings, and fluffy BBQ pork buns.",
-    "ingredients": [
-      "6 Prepared Pork & Shrimp Shumai",
-      "6 Prepared Har Gow Shrimp Dumplings",
-      "2 Steamed Char Siu BBQ Pork Buns",
-      "Soy sauce & Chili crisp oil",
-      "Dipping vinegar with shredded ginger"
-    ],
-    "instructions": [
-      "Line bamboo steamer baskets with perforated parchment paper.",
-      "Arrange Shumai, Har Gow, and pork buns in steaming tiers without touching.",
-      "Steam over boiling water for 8-10 minutes until steaming hot and dough turns translucent.",
-      "Serve hot directly in bamboo baskets alongside chili crisp oil and soy vinegar."
-    ]
-  },
-  {
-    "id": 6,
-    "name": "Ribeye Steak with Herb Butter",
-    "emoji": "🥩",
-    "prepTime": "25 mins",
-    "course": "Main Course",
-    "cuisine": "Western",
-    "protein": "Beef",
     "baseStyle": "Rice",
-    "difficulty": "Medium",
-    "mood": "Date Night / Fancy",
-    "description": "Juicy, well-marbled ribeye steak pan-seared in cast-iron and basted with garlic, rosemary, and compound herb butter.",
+    "difficulty": "Hard",
+    "mood": "Comforting",
+    "description": "Crispy panko-breaded pork cutlet served alongside rich, savory Japanese curry sauce and warm steamed rice.",
     "ingredients": [
-      "1 Thick-cut Ribeye steak (12 oz)",
-      "2 tbsp Unsalted butter",
-      "2 cloves Garlic (smashed)",
-      "2 sprigs Fresh Rosemary & Thyme",
-      "Coarse Kosher salt & cracked black pepper"
+      "2 Boneless pork chops",
+      "1/2 cup Panko breadcrumbs",
+      "1 Egg (beaten) & flour for dredging",
+      "2 Japanese curry roux blocks",
+      "1 Potato & 1 Carrot (cubed)",
+      "Steamed white rice"
     ],
     "instructions": [
-      "Pat steak dry and season generously with kosher salt and black pepper.",
-      "Sear in a red-hot cast-iron skillet for 3 minutes until a deep crust forms.",
-      "Flip steak and add butter, smashed garlic, rosemary, and thyme to skillet.",
-      "Spoon melted herb butter continuously over steak while cooking to desired doneness.",
-      "Rest steak on a cutting board for 5-7 minutes before slicing."
+      "Boil cubed potatoes and carrots until tender; dissolve curry roux blocks in 2 cups hot water and combine with veggies.",
+      "Dredge pork chops in flour, dip in beaten egg, and coat thoroughly with panko breadcrumbs.",
+      "Deep-fry cutlets in oil at 350°F (175°C) for 5-6 minutes until golden and crispy.",
+      "Slice cutlet into strips and arrange over rice, ladling warm curry sauce alongside."
     ]
   },
   {
-    "id": 7,
+    "id": 16,
     "name": "Classic Cheeseburger",
     "emoji": "🍔",
     "prepTime": "15 mins",
@@ -199,144 +445,90 @@
     ]
   },
   {
-    "id": 8,
-    "name": "Brown Sugar Boba Milk Tea",
-    "emoji": "🧋",
-    "prepTime": "15 mins",
-    "course": "Dessert",
-    "cuisine": "Asian",
-    "protein": "Vegetarian/Tofu",
-    "baseStyle": "Soup",
-    "difficulty": "Easy",
-    "mood": "Guilty Pleasure",
-    "description": "Chewy tapioca pearls simmered in dark brown sugar syrup, layered with ice and fresh whole milk or oat milk.",
-    "ingredients": [
-      "1/2 cup Quick-cooking tapioca boba pearls",
-      "3 tbsp Dark brown muscovado sugar",
-      "1 cup Fresh whole milk or Oat milk",
-      "1/2 cup Black tea (brewed strong & chilled)",
-      "Ice cubes"
-    ],
-    "instructions": [
-      "Boil boba pearls for 5 minutes until chewy; drain and transfer to saucepan.",
-      "Add brown sugar and 2 tbsp water; simmer until boba turns glossy and syrupy.",
-      "Spoon warm boba and syrup into glasses, swirling syrup along inside walls.",
-      "Fill glass with ice cubes, then pour chilled black tea and fresh milk."
-    ]
-  },
-  {
-    "id": 9,
-    "name": "Vanilla Bean Ice Cream Sundae",
-    "emoji": "🍨",
-    "prepTime": "10 mins",
-    "course": "Dessert",
-    "cuisine": "Western",
-    "protein": "Vegetarian/Tofu",
-    "baseStyle": "Sandwich/Wrap",
-    "difficulty": "Easy",
-    "mood": "Comforting",
-    "description": "Decadent scoops of rich vanilla bean ice cream drenched in hot fudge, topped with whipped cream, toasted almonds, and a cherry.",
-    "ingredients": [
-      "3 scoops Vanilla bean ice cream",
-      "3 tbsp Warm chocolate hot fudge sauce",
-      "Fresh whipped cream",
-      "2 tbsp Sliced toasted almonds",
-      "1 Maraschino cherry"
-    ],
-    "instructions": [
-      "Scoop vanilla ice cream into a chilled glass sundae bowl.",
-      "Drizzle warm hot fudge sauce generously over ice cream.",
-      "Top with a tall swirl of whipped cream and sprinkle toasted almonds.",
-      "Finish with a cherry on top and serve immediately."
-    ]
-  },
-  {
-    "id": 10,
-    "name": "Mango Sticky Rice",
-    "emoji": "🥭",
-    "prepTime": "25 mins",
-    "course": "Dessert",
-    "cuisine": "Asian",
-    "protein": "Vegetarian/Tofu",
-    "baseStyle": "Rice",
-    "difficulty": "Medium",
-    "mood": "Fresh & Light",
-    "description": "Sweet Thai sticky rice infused with coconut milk, served alongside ripe sliced yellow mango and toasted sesame seeds.",
-    "ingredients": [
-      "1 cup Thai sweet glutinous rice",
-      "1/2 cup Coconut milk",
-      "3 tbsp Palm sugar or white sugar",
-      "1/4 tsp Salt",
-      "1 Ripe honey mango (sliced)",
-      "1 tbsp Toasted mung beans or sesame seeds"
-    ],
-    "instructions": [
-      "Steam soaked glutinous rice for 20 minutes until tender.",
-      "Warm coconut milk with sugar and salt over low heat until dissolved.",
-      "Pour 3/4 of sweet coconut milk sauce over hot cooked sticky rice; cover and let absorb for 10 minutes.",
-      "Plate sticky rice with sliced ripe mango.",
-      "Drizzle remaining coconut sauce over top and sprinkle with toasted sesame seeds."
-    ]
-  },
-  {
-    "id": 11,
-    "name": "Churros with Chocolate",
-    "emoji": "🥖",
-    "prepTime": "30 mins",
-    "course": "Dessert",
-    "cuisine": "Mexican",
-    "protein": "Vegetarian/Tofu",
-    "baseStyle": "Sandwich/Wrap",
-    "difficulty": "Medium",
-    "mood": "Guilty Pleasure",
-    "description": "Crispy golden fried Spanish dough dusted in cinnamon sugar, served with thick dark dipping chocolate.",
-    "ingredients": [
-      "1 cup Water + 2 tbsp Sugar + 2 tbsp Butter",
-      "1 cup All-purpose flour",
-      "1/2 cup Cinnamon sugar blend",
-      "100g Dark Spanish chocolate",
-      "1/2 cup Heavy cream (for dipping sauce)",
-      "Oil for frying"
-    ],
-    "instructions": [
-      "Bring water, sugar, and butter to a boil; stir in flour until dough ball forms.",
-      "Transfer dough to a piping bag fitted with a star tip.",
-      "Pipe 4-inch strips directly into hot oil (350°F) and fry for 3-4 minutes until golden.",
-      "Drain churros and roll immediately in cinnamon sugar.",
-      "Melt dark chocolate with heavy cream to make thick dipping sauce."
-    ]
-  },
-  {
-    "id": 12,
-    "name": "Beef Tacos al Pastor",
-    "emoji": "🌮",
+    "id": 17,
+    "name": "Spaghetti Carbonara",
+    "emoji": "🍝",
     "prepTime": "20 mins",
     "course": "Main Course",
-    "cuisine": "Mexican",
-    "protein": "Beef",
-    "baseStyle": "Sandwich/Wrap",
-    "difficulty": "Easy",
-    "mood": "Feast / Hungry",
-    "description": "Flavorful seasoned flank steak served in warm corn tortillas with diced pineapple, chopped onions, and fresh cilantro.",
+    "cuisine": "Western",
+    "protein": "Pork",
+    "baseStyle": "Pasta",
+    "difficulty": "Medium",
+    "mood": "Comforting",
+    "description": "Classic Roman pasta with crispy guanciale or pancetta, tossed with egg yolks, grated Pecorino Romano, and cracked black pepper.",
     "ingredients": [
-      "1 lb Flank steak (thinly sliced)",
-      "1 tbsp Taco seasoning",
-      "1/2 cup Diced pineapple",
-      "8 Small corn tortillas",
-      "1/2 White onion (diced)",
-      "Fresh cilantro",
-      "Salsa verde"
+      "8 oz Spaghetti",
+      "100g Pancetta or Guanciale (cubed)",
+      "2 Large egg yolks + 1 whole egg",
+      "3/4 cup Pecorino Romano (freshly grated)",
+      "Freshly cracked black pepper",
+      "Salt for pasta water"
     ],
     "instructions": [
-      "Season sliced steak generously with taco seasoning.",
-      "Sear steak in a scorching hot skillet for 3-4 minutes until nicely browned.",
-      "Warm corn tortillas in a dry skillet until soft and pliable.",
-      "Assemble tacos with beef, a spoon of diced pineapple, raw onion, and cilantro.",
-      "Serve hot with salsa verde on the side."
+      "Boil spaghetti in salted water until al dente; reserve 1/2 cup pasta water.",
+      "Crisp pancetta in a skillet over medium heat until golden; remove from heat.",
+      "Whisk eggs and Pecorino Romano together in a bowl with plenty of black pepper.",
+      "Toss hot pasta into the skillet with pancetta, then quickly stir in the egg mixture off heat.",
+      "Add pasta water as needed to create a glossy, creamy emulsion."
     ]
   },
   {
-    "id": 13,
+    "id": 18,
+    "name": "Ribeye Steak with Herb Butter",
+    "emoji": "🥩",
+    "prepTime": "25 mins",
+    "course": "Main Course",
+    "cuisine": "Western",
+    "protein": "Beef",
+    "baseStyle": "Rice",
+    "difficulty": "Medium",
+    "mood": "Date Night / Fancy",
+    "description": "Juicy, well-marbled ribeye steak pan-seared in cast-iron and basted with garlic, rosemary, and compound herb butter.",
+    "ingredients": [
+      "1 Thick-cut Ribeye steak (12 oz)",
+      "2 tbsp Unsalted butter",
+      "2 cloves Garlic (smashed)",
+      "2 sprigs Fresh Rosemary & Thyme",
+      "Coarse Kosher salt & cracked black pepper"
+    ],
+    "instructions": [
+      "Pat steak dry and season generously with kosher salt and black pepper.",
+      "Sear in a red-hot cast-iron skillet for 3 minutes until a deep crust forms.",
+      "Flip steak and add butter, smashed garlic, rosemary, and thyme to skillet.",
+      "Spoon melted herb butter continuously over steak while cooking to desired doneness.",
+      "Rest steak on a cutting board for 5-7 minutes before slicing."
+    ]
+  },
+  {
+    "id": 19,
+    "name": "Beef Bolognese Pappardelle",
+    "emoji": "🍝",
+    "prepTime": "45 mins",
+    "course": "Main Course",
+    "cuisine": "Western",
+    "protein": "Beef",
+    "baseStyle": "Pasta",
+    "difficulty": "Hard",
+    "mood": "Date Night / Fancy",
+    "description": "Slow-simmered rich beef ragù with tomatoes, aromatics, and red wine over broad ribbons of pappardelle pasta.",
+    "ingredients": [
+      "1 lb Ground beef",
+      "1 Medium onion, carrot, & celery stalk (finely diced)",
+      "1/2 cup Red wine",
+      "1 can (28oz) Whole peeled tomatoes",
+      "12 oz Pappardelle pasta",
+      "Parmesan cheese"
+    ],
+    "instructions": [
+      "Sauté diced onion, carrot, and celery in olive oil until soft.",
+      "Add ground beef, browning thoroughly while breaking up chunks.",
+      "Pour in red wine to deglaze, simmering until liquid reduces by half.",
+      "Crush tomatoes into the pot, lower heat, and simmer for 30 minutes.",
+      "Toss with cooked pappardelle and top with freshly grated Parmesan."
+    ]
+  },
+  {
+    "id": 20,
     "name": "Creamy Tuscan Salmon",
     "emoji": "🐟",
     "prepTime": "25 mins",
@@ -366,38 +558,38 @@
     ]
   },
   {
-    "id": 14,
-    "name": "Teriyaki Tofu Rice Bowl",
-    "emoji": "🍱",
-    "prepTime": "30 mins",
-    "course": "Main Course",
-    "cuisine": "Asian",
-    "protein": "Vegetarian/Tofu",
-    "baseStyle": "Rice",
+    "id": 21,
+    "name": "Hearty Chicken Noodle Soup",
+    "emoji": "🍲",
+    "prepTime": "35 mins",
+    "course": "Starter / Appetizer",
+    "cuisine": "Western",
+    "protein": "Chicken",
+    "baseStyle": "Soup",
     "difficulty": "Easy",
-    "mood": "Healthy & Clean",
-    "description": "Crispy pan-fried tofu glazed in home-made teriyaki sauce, served over fluffy jasmine rice with steamed broccoli.",
+    "mood": "Comforting",
+    "description": "Comforting classic soup brimming with shredded chicken, egg noodles, carrots, celery, and fresh herbs in a rich broth.",
     "ingredients": [
-      "1 block Extra-firm tofu (pressed & cubed)",
-      "2 tbsp Cornstarch",
-      "2 cups Cooked Jasmine rice",
-      "1/4 cup Soy sauce",
-      "2 tbsp Honey or maple syrup",
-      "1 tbsp Mirin",
-      "1 cup Steamed broccoli florets",
-      "Sesame seeds for garnish"
+      "2 cups Shredded cooked chicken",
+      "6 cups Chicken stock",
+      "1.5 cups Egg noodles",
+      "2 Carrots (sliced)",
+      "2 Celery stalks (chopped)",
+      "1 Medium onion (diced)",
+      "2 tbsp Fresh parsley",
+      "1 tbsp Butter"
     ],
     "instructions": [
-      "Toss cubed tofu in cornstarch until lightly coated.",
-      "Pan-fry tofu in vegetable oil over medium-high heat until golden crisp on all sides (approx. 8-10 mins).",
-      "Whisk soy sauce, honey, mirin, and 1 tbsp water together.",
-      "Pour teriyaki sauce over the crispy tofu; simmer for 2 minutes until glossy and thick.",
-      "Serve tofu over warm jasmine rice with broccoli, garnished with sesame seeds."
+      "Melt butter in a large soup pot over medium heat. Add onion, carrots, and celery; cook for 6 minutes until softened.",
+      "Pour in chicken stock and bring to a boil.",
+      "Add egg noodles and simmer uncovered for 8-10 minutes until tender.",
+      "Stir in shredded chicken and fresh parsley; heat through for 2 minutes.",
+      "Season to taste with salt and pepper, serve warm."
     ]
   },
   {
-    "id": 15,
-    "name": "Greek Lemon Orzo Soup",
+    "id": 22,
+    "name": "Greek Lemon Orzo Soup (Avgolemono)",
     "emoji": "🍋",
     "prepTime": "25 mins",
     "course": "Starter / Appetizer",
@@ -425,34 +617,7 @@
     ]
   },
   {
-    "id": 16,
-    "name": "Pork Carnitas Burrito Bowl",
-    "emoji": "🌯",
-    "prepTime": "20 mins",
-    "course": "Main Course",
-    "cuisine": "Mexican",
-    "protein": "Pork",
-    "baseStyle": "Rice",
-    "difficulty": "Easy",
-    "mood": "Quick & Lazy",
-    "description": "Crispy slow-cooked shredded pork served over cilantro-lime rice, black beans, corn salsa, and fresh avocado.",
-    "ingredients": [
-      "2 cups Crispy shredded pork carnitas",
-      "2 cups Cilantro-lime rice",
-      "1 can Black beans (warmed)",
-      "1/2 cup Sweet corn",
-      "1 Avocado (sliced)",
-      "Sour cream & Cotija cheese"
-    ],
-    "instructions": [
-      "Crisp up cooked pork carnitas in a hot skillet for 5 minutes.",
-      "Base each bowl with cilantro-lime rice.",
-      "Top with equal portions of carnitas, black beans, corn, and avocado slices.",
-      "Finish with a dollop of sour cream and sprinkled Cotija cheese."
-    ]
-  },
-  {
-    "id": 17,
+    "id": 23,
     "name": "Vegetarian Falafel Pita Wrap",
     "emoji": "🥙",
     "prepTime": "15 mins",
@@ -478,34 +643,7 @@
     ]
   },
   {
-    "id": 18,
-    "name": "Greek Lemon Herb Chicken Skewers",
-    "emoji": "🍢",
-    "prepTime": "30 mins",
-    "course": "Main Course",
-    "cuisine": "Mediterranean",
-    "protein": "Chicken",
-    "baseStyle": "Rice",
-    "difficulty": "Medium",
-    "mood": "Fresh & Light",
-    "description": "Tender marinated chicken breast cubes grilled on skewers with bell peppers, onions, served over lemon rice and tzatziki.",
-    "ingredients": [
-      "1.5 lbs Chicken breast (cubed)",
-      "2 tbsp Olive oil, lemon juice, & oregano",
-      "1 Bell pepper & 1 Red onion (cut into chunks)",
-      "Wooden skewers",
-      "2 cups Cooked lemon rice",
-      "Tzatziki dip"
-    ],
-    "instructions": [
-      "Marinate chicken in olive oil, lemon juice, oregano, salt, and pepper for 15 minutes.",
-      "Thread alternating chicken, bell pepper, and onion onto skewers.",
-      "Grill skewers over high heat for 10-12 minutes, turning occasionally until cooked through.",
-      "Serve hot over lemon rice alongside cool tzatziki."
-    ]
-  },
-  {
-    "id": 19,
+    "id": 24,
     "name": "Seafood Paella",
     "emoji": "🥘",
     "prepTime": "50 mins",
@@ -532,7 +670,63 @@
     ]
   },
   {
-    "id": 20,
+    "id": 25,
+    "name": "Beef Tacos al Pastor",
+    "emoji": "🌮",
+    "prepTime": "20 mins",
+    "course": "Main Course",
+    "cuisine": "Mexican",
+    "protein": "Beef",
+    "baseStyle": "Sandwich/Wrap",
+    "difficulty": "Easy",
+    "mood": "Feast / Hungry",
+    "description": "Flavorful seasoned flank steak served in warm corn tortillas with diced pineapple, chopped onions, and fresh cilantro.",
+    "ingredients": [
+      "1 lb Flank steak (thinly sliced)",
+      "1 tbsp Taco seasoning",
+      "1/2 cup Diced pineapple",
+      "8 Small corn tortillas",
+      "1/2 White onion (diced)",
+      "Fresh cilantro",
+      "Salsa verde"
+    ],
+    "instructions": [
+      "Season sliced steak generously with taco seasoning.",
+      "Sear steak in a scorching hot skillet for 3-4 minutes until nicely browned.",
+      "Warm corn tortillas in a dry skillet until soft and pliable.",
+      "Assemble tacos with beef, a spoon of diced pineapple, raw onion, and cilantro.",
+      "Serve hot with salsa verde on the side."
+    ]
+  },
+  {
+    "id": 26,
+    "name": "Pork Carnitas Burrito Bowl",
+    "emoji": "🌯",
+    "prepTime": "20 mins",
+    "course": "Main Course",
+    "cuisine": "Mexican",
+    "protein": "Pork",
+    "baseStyle": "Rice",
+    "difficulty": "Easy",
+    "mood": "Quick & Lazy",
+    "description": "Crispy slow-cooked shredded pork served over cilantro-lime rice, black beans, corn salsa, and fresh avocado.",
+    "ingredients": [
+      "2 cups Crispy shredded pork carnitas",
+      "2 cups Cilantro-lime rice",
+      "1 can Black beans (warmed)",
+      "1/2 cup Sweet corn",
+      "1 Avocado (sliced)",
+      "Sour cream & Cotija cheese"
+    ],
+    "instructions": [
+      "Crisp up cooked pork carnitas in a hot skillet for 5 minutes.",
+      "Base each bowl with cilantro-lime rice.",
+      "Top with equal portions of carnitas, black beans, corn, and avocado slices.",
+      "Finish with a dollop of sour cream and sprinkled Cotija cheese."
+    ]
+  },
+  {
+    "id": 27,
     "name": "Loaded Nacho Platter",
     "emoji": "🧀",
     "prepTime": "15 mins",
@@ -556,6 +750,162 @@
       "Top with black beans, jalapenos, and a heavy layer of shredded cheese.",
       "Bake at 400°F (200°C) for 8-10 minutes until cheese is completely melted and bubbly.",
       "Top with scoops of guacamole, sour cream, and fresh diced tomatoes before serving."
+    ]
+  },
+  {
+    "id": 28,
+    "name": "Classic Fudge Chocolate Cake",
+    "emoji": "🍰",
+    "prepTime": "45 mins",
+    "course": "Dessert",
+    "cuisine": "Western",
+    "protein": "Vegetarian/Tofu",
+    "baseStyle": "Baked / Cake",
+    "difficulty": "Medium",
+    "mood": "Guilty Pleasure",
+    "description": "Moist double-chocolate layer cake covered in silky dark chocolate ganache frosting.",
+    "ingredients": [
+      "2 cups All-purpose flour & 3/4 cup Cocoa powder",
+      "2 cups Sugar & 1 tsp Baking powder",
+      "2 Eggs & 1 cup Buttermilk",
+      "1/2 cup Hot brewed coffee",
+      "8 oz Dark chocolate melted with heavy cream"
+    ],
+    "instructions": [
+      "Whisk dry ingredients, add buttermilk and eggs, then stir in hot coffee.",
+      "Bake at 350°F (175°C) for 30 minutes until toothpick comes out clean.",
+      "Cool completely, then coat in glossy chocolate ganache frosting."
+    ]
+  },
+  {
+    "id": 29,
+    "name": "Japanese Fluffy Soufflé Cheesecake",
+    "emoji": "🧀",
+    "prepTime": "50 mins",
+    "course": "Dessert",
+    "cuisine": "Asian",
+    "protein": "Vegetarian/Tofu",
+    "baseStyle": "Baked / Cake",
+    "difficulty": "Hard",
+    "mood": "Fresh & Light",
+    "description": "Cotton-soft, jiggly Japanese soufflé cheesecake dusted with powdered sugar.",
+    "ingredients": [
+      "250g Cream cheese (softened)",
+      "6 Eggs (separated)",
+      "1/2 cup Milk & 50g Unsalted butter",
+      "1/2 cup Sugar & 1/3 cup Cake flour",
+      "Powdered sugar for dusting"
+    ],
+    "instructions": [
+      "Melt cream cheese, butter, and milk together; whisk in egg yolks and flour.",
+      "Whip egg whites with sugar into soft meringue peaks; fold into batter.",
+      "Bake in a water bath at 320°F (160°C) for 60 minutes.",
+      "Dust with powdered sugar and serve."
+    ]
+  },
+  {
+    "id": 30,
+    "name": "Brown Sugar Boba Milk Tea",
+    "emoji": "🧋",
+    "prepTime": "15 mins",
+    "course": "Dessert",
+    "cuisine": "Asian",
+    "protein": "Vegetarian/Tofu",
+    "baseStyle": "Beverage / Dessert",
+    "difficulty": "Easy",
+    "mood": "Guilty Pleasure",
+    "description": "Chewy tapioca pearls simmered in dark brown sugar syrup, layered with ice and fresh whole milk.",
+    "ingredients": [
+      "1/2 cup Quick-cooking tapioca boba pearls",
+      "3 tbsp Dark brown sugar",
+      "1 cup Fresh whole milk or Oat milk",
+      "1/2 cup Black tea (brewed strong & chilled)",
+      "Ice cubes"
+    ],
+    "instructions": [
+      "Boil boba pearls for 5 minutes until chewy; drain.",
+      "Simmer pearls with brown sugar and 2 tbsp water until syrupy.",
+      "Spoon boba syrup into glasses, add ice cubes, and pour fresh milk and black tea."
+    ]
+  },
+  {
+    "id": 31,
+    "name": "Vanilla Bean Ice Cream Sundae",
+    "emoji": "🍨",
+    "prepTime": "10 mins",
+    "course": "Dessert",
+    "cuisine": "Western",
+    "protein": "Vegetarian/Tofu",
+    "baseStyle": "Beverage / Dessert",
+    "difficulty": "Easy",
+    "mood": "Comforting",
+    "description": "Rich vanilla bean ice cream drenched in hot fudge, topped with whipped cream, toasted almonds, and a cherry.",
+    "ingredients": [
+      "3 scoops Vanilla bean ice cream",
+      "3 tbsp Hot fudge sauce",
+      "Fresh whipped cream",
+      "2 tbsp Sliced toasted almonds",
+      "1 Maraschino cherry"
+    ],
+    "instructions": [
+      "Scoop vanilla ice cream into a chilled bowl.",
+      "Drizzle warm fudge sauce over top.",
+      "Add whipped cream, toasted almonds, and finish with a cherry."
+    ]
+  },
+  {
+    "id": 32,
+    "name": "Mango Sticky Rice",
+    "emoji": "🥭",
+    "prepTime": "25 mins",
+    "course": "Dessert",
+    "cuisine": "Asian",
+    "protein": "Vegetarian/Tofu",
+    "baseStyle": "Rice",
+    "difficulty": "Medium",
+    "mood": "Fresh & Light",
+    "description": "Sweet Thai sticky rice infused with coconut milk, served alongside ripe sliced yellow mango and toasted sesame seeds.",
+    "ingredients": [
+      "1 cup Thai sweet glutinous rice",
+      "1/2 cup Coconut milk",
+      "3 tbsp Palm sugar or white sugar",
+      "1/4 tsp Salt",
+      "1 Ripe honey mango (sliced)",
+      "1 tbsp Toasted sesame seeds"
+    ],
+    "instructions": [
+      "Steam soaked glutinous rice for 20 minutes until tender.",
+      "Warm coconut milk with sugar and salt over low heat until dissolved.",
+      "Pour sweet coconut milk sauce over hot cooked sticky rice; cover and let absorb for 10 minutes.",
+      "Plate sticky rice with sliced ripe mango, drizzle remaining sauce, and sprinkle with sesame seeds."
+    ]
+  },
+  {
+    "id": 33,
+    "name": "Churros with Chocolate",
+    "emoji": "🥖",
+    "prepTime": "30 mins",
+    "course": "Dessert",
+    "cuisine": "Mexican",
+    "protein": "Vegetarian/Tofu",
+    "baseStyle": "Sandwich/Wrap",
+    "difficulty": "Medium",
+    "mood": "Guilty Pleasure",
+    "description": "Crispy golden fried Spanish dough dusted in cinnamon sugar, served with thick dark dipping chocolate.",
+    "ingredients": [
+      "1 cup Water + 2 tbsp Sugar + 2 tbsp Butter",
+      "1 cup All-purpose flour",
+      "1/2 cup Cinnamon sugar blend",
+      "100g Dark Spanish chocolate",
+      "1/2 cup Heavy cream (for dipping sauce)",
+      "Oil for frying"
+    ],
+    "instructions": [
+      "Bring water, sugar, and butter to a boil; stir in flour until dough ball forms.",
+      "Transfer dough to a piping bag fitted with a star tip.",
+      "Pipe 4-inch strips directly into hot oil (350°F) and fry for 3-4 minutes until golden.",
+      "Drain churros and roll immediately in cinnamon sugar.",
+      "Melt dark chocolate with heavy cream to make thick dipping sauce."
     ]
   }
 ]
