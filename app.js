@@ -4,6 +4,8 @@
 
 let recipes = [];
 let activeTab = 'ingredients';
+let currentServings = 2; // Default serving size
+const BASE_SERVINGS = 2; // Baseline reference serving size
 
 // LocalStorage Keys
 const FAVORITES_KEY = 'thymetoeat_favorites';
@@ -25,6 +27,8 @@ const moodSelect = document.getElementById('moodSelect');
 
 const findMealBtn = document.getElementById('findMealBtn');
 const surpriseBtn = document.getElementById('surpriseBtn');
+const findMealIcon = document.getElementById('findMealIcon');
+const surpriseIcon = document.getElementById('surpriseIcon');
 const resultContainer = document.getElementById('resultContainer');
 
 // Inline Customization Controls
@@ -46,25 +50,62 @@ const drawerTitle = document.getElementById('drawerTitle');
 const drawerContent = document.getElementById('drawerContent');
 const drawerFooter = document.getElementById('drawerFooter');
 const closeDrawerBtn = document.getElementById('closeDrawerBtn');
+const toastContainer = document.getElementById('toastContainer');
+
+/**
+ * Floating Toast Notification System (Top-Right Screen Overlay)
+ * Displays toasts with an auto 3-second fade-out.
+ */
+function showToast(message, type = 'info') {
+    if (!toastContainer) return;
+
+    const toast = document.createElement('div');
+    
+    let badgeBg = 'bg-slate-900/95 text-white border-slate-700/80';
+    let icon = 'fa-circle-info text-brand-400';
+
+    if (type === 'success') {
+        badgeBg = 'bg-slate-900/95 text-white border-emerald-500/50';
+        icon = 'fa-circle-check text-emerald-400';
+    } else if (type === 'amber') {
+        badgeBg = 'bg-slate-900/95 text-white border-amber-500/50';
+        icon = 'fa-star text-amber-400';
+    } else if (type === 'rose') {
+        badgeBg = 'bg-slate-900/95 text-white border-rose-500/50';
+        icon = 'fa-thumbs-down text-rose-400';
+    }
+
+    toast.className = `pointer-events-auto flex items-center gap-3 px-4 py-3 rounded-2xl border shadow-2xl backdrop-blur-md text-xs sm:text-sm font-semibold animate-toast-in ${badgeBg}`;
+    toast.innerHTML = `
+        <i class="fa-solid ${icon} text-base shrink-0"></i>
+        <span>${message}</span>
+    `;
+
+    toastContainer.appendChild(toast);
+
+    setTimeout(() => {
+        toast.classList.remove('animate-toast-in');
+        toast.classList.add('animate-toast-out');
+        setTimeout(() => {
+            if (toast.parentNode) toast.parentNode.removeChild(toast);
+        }, 300);
+    }, 3000);
+}
 
 /**
  * Point-Based Weight Calculation Engine
  * - Base Weight: 10 pts
  * - Direct Starred: +15 pts
- * - Shared Trait with Starred (Cuisine, Course, or Style): +5 pts
+ * - Shared Trait with Starred: +5 pts
  * - Cooked History: +5 pts
  * - Dislike Penalty: -8 pts (Minimum weight floor of 1)
  */
 function calculateRecipeWeight(recipe) {
-    let weight = 10; // Baseline points
+    let weight = 10;
 
-    // 1. Direct Starred Check (+15 pts)
     const isDirectlyStarred = favorites.includes(recipe.id);
-    if (isDirectlyStarred) {
-        weight += 15;
-    }
+    if (isDirectlyStarred) weight += 15;
 
-    // 2. Shared Traits with Starred Dishes Check (+5 pts)
     const starredRecipes = recipes.filter(r => favorites.includes(r.id));
     const sharesTrait = starredRecipes.some(starred => 
         starred.id !== recipe.id && (
@@ -73,29 +114,19 @@ function calculateRecipeWeight(recipe) {
             starred.baseStyle === recipe.baseStyle
         )
     );
-    if (sharesTrait) {
-        weight += 5;
-    }
+    if (sharesTrait) weight += 5;
 
-    // 3. Cooked History Check (+5 pts)
     const hasBeenCooked = cookingHistory.some(log => log.recipeId === recipe.id);
-    if (hasBeenCooked) {
-        weight += 5;
-    }
+    if (hasBeenCooked) weight += 5;
 
-    // 4. Disliked / Passed Penalty (-8 pts)
     const isDisliked = dislikedRecipes.includes(recipe.id);
-    if (isDisliked) {
-        weight -= 8;
-    }
+    if (isDisliked) weight -= 8;
 
-    // Ensure weight floor of 1 so a disliked dish can still technically appear, albeit rarely
     return Math.max(1, weight);
 }
 
 /**
  * Weighted Random Pick Function
- * Uses Cumulative Probability Distribution based on calculated point scores.
  */
 function weightedRandomChoice(candidateItems) {
     if (!candidateItems || candidateItems.length === 0) return null;
@@ -229,6 +260,45 @@ function getDifficultyBadgeClass(difficulty) {
     }
 }
 
+/**
+ * Ingredient Quantity Scaling Helper
+ * Parses numeric values/fractions in ingredient strings and scales them by multiplier.
+ */
+function scaleIngredientText(ingredientStr, multiplier) {
+    if (multiplier === 1) return ingredientStr;
+
+    return ingredientStr.replace(/\b(\d+\/\d+|\d+\.\d+|\d+)\b/g, (match) => {
+        let val;
+        if (match.includes('/')) {
+            const [num, den] = match.split('/');
+            val = parseFloat(num) / parseFloat(den);
+        } else {
+            val = parseFloat(match);
+        }
+
+        const scaled = val * multiplier;
+        return parseFloat(scaled.toFixed(2)).toString();
+    });
+}
+
+/**
+ * Dynamic Prep & Cook Time Scaler
+ * Calculates scaled preparation time based on portion count with a clear batch note.
+ */
+function calculateScaledTime(basePrepTime, servings) {
+    if (servings === BASE_SERVINGS) return basePrepTime;
+
+    const match = basePrepTime.match(/(\d+)/);
+    if (!match) return basePrepTime;
+
+    const baseMins = parseInt(match[1], 10);
+    // Scaling time slightly with servings (square root factor prevents unrealistically high cooking times)
+    const scaleFactor = Math.sqrt(servings / BASE_SERVINGS);
+    const scaledMins = Math.round(baseMins * scaleFactor);
+
+    return `${scaledMins} mins <span class="text-[11px] font-normal opacity-85">(scaled for ${servings} servings; base recipe: ${BASE_SERVINGS} servings)</span>`;
+}
+
 // Render Recipe Card View
 function renderCard({ recipe, isFallback, matchedTraits }) {
     if (!recipe) {
@@ -243,20 +313,21 @@ function renderCard({ recipe, isFallback, matchedTraits }) {
             </div>
         `;
         document.getElementById('noMatchSurpriseBtn').addEventListener('click', () => {
-            renderCard(findMeal(true));
+            triggerInteractiveLoading(surpriseBtn, surpriseIcon, () => renderCard(findMeal(true)));
         });
         return;
     }
 
     const isStarred = favorites.includes(recipe.id);
     const isDisliked = dislikedRecipes.includes(recipe.id);
+    const multiplier = currentServings / BASE_SERVINGS;
 
     resultContainer.innerHTML = `
         <div class="bg-white rounded-3xl overflow-hidden shadow-2xl border border-slate-100 animate-pop-in w-full">
             ${isFallback ? `
                 <div class="bg-amber-500 text-slate-900 px-6 py-3 font-medium text-xs sm:text-sm flex items-center justify-between gap-2 border-b border-amber-600/20">
                     <span>No exact match found, but here is a close match based on <strong>${matchedTraits.join(', ')}</strong>!</span>
-                    <button id="fallbackSurpriseBtn" class="underline font-bold whitespace-nowrap cursor-pointer">Surprise Me</button>
+                    <button id="fallbackSurpriseBtn" class="underline font-bold whitespace-nowrap cursor-pointer hover:text-white transition-colors">Surprise Me</button>
                 </div>
             ` : ''}
 
@@ -264,28 +335,28 @@ function renderCard({ recipe, isFallback, matchedTraits }) {
             <div class="bg-gradient-to-r from-emerald-600 via-brand-600 to-teal-700 p-6 sm:p-8 text-white relative">
                 <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                     <div class="flex items-center space-x-4">
-                        <div class="w-16 h-16 sm:w-20 sm:h-20 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center text-4xl sm:text-5xl shrink-0">
+                        <div class="w-16 h-16 sm:w-20 sm:h-20 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center text-4xl sm:text-5xl shrink-0 transition-transform hover:scale-105 duration-200">
                             ${recipe.emoji}
                         </div>
                         <div>
                             <div class="flex items-center gap-3">
                                 <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight">${recipe.name}</h2>
-                                <button id="starBtn" class="text-2xl cursor-pointer ${isStarred ? 'text-amber-300' : 'text-white/40 hover:text-white'}" title="${isStarred ? 'Remove from favorites' : 'Add to favorites'}">
+                                <button id="starBtn" class="text-2xl cursor-pointer transition-all active:scale-75 ${isStarred ? 'text-amber-300 scale-110' : 'text-white/40 hover:text-white'}" title="${isStarred ? 'Remove from favorites' : 'Add to favorites'}">
                                     <i class="${isStarred ? 'fa-solid' : 'fa-regular'} fa-star"></i>
                                 </button>
-                                <!-- Dislike / Thumbs-Down Icon Button -->
-                                <button id="dislikeBtn" class="text-xl cursor-pointer transition-colors ${isDisliked ? 'text-rose-300' : 'text-white/40 hover:text-rose-200'}" title="${isDisliked ? 'In Dislike List (-8 pts)' : 'Dislike dish (-8 pts penalty)'}">
+                                <button id="dislikeBtn" class="text-xl cursor-pointer transition-all active:scale-75 ${isDisliked ? 'text-rose-300 scale-110' : 'text-white/40 hover:text-rose-200'}" title="${isDisliked ? 'In Dislike List (-8 pts)' : 'Dislike dish (-8 pts penalty)'}">
                                     <i class="fa-solid fa-thumbs-down"></i>
                                 </button>
                             </div>
-                            <p class="text-brand-100 text-sm mt-1 flex items-center gap-2">
-                                <span><i class="fa-regular fa-clock"></i> ${recipe.prepTime}</span>
+                            <p class="text-brand-100 text-sm mt-1 flex items-center gap-1.5 flex-wrap">
+                                <i class="fa-regular fa-clock"></i>
+                                <span>${calculateScaledTime(recipe.prepTime, currentServings)}</span>
                             </p>
                         </div>
                     </div>
 
                     <!-- Mark as Cooked Action -->
-                    <button id="markCookedBtn" class="w-full sm:w-auto px-4 py-2.5 bg-white/20 hover:bg-white/30 backdrop-blur-md text-white border border-white/30 rounded-xl text-xs sm:text-sm font-semibold flex items-center justify-center gap-2 transition-all cursor-pointer">
+                    <button id="markCookedBtn" class="w-full sm:w-auto px-4 py-2.5 bg-white/20 hover:bg-white/30 active:scale-95 backdrop-blur-md text-white border border-white/30 rounded-xl text-xs sm:text-sm font-semibold flex items-center justify-center gap-2 transition-all cursor-pointer">
                         <i class="fa-solid fa-circle-check text-emerald-300"></i>
                         <span>Mark as Cooked</span>
                     </button>
@@ -320,21 +391,40 @@ function renderCard({ recipe, isFallback, matchedTraits }) {
 
                 <!-- Navigation Tabs -->
                 <div class="flex border-b border-slate-200 mb-6">
-                    <button id="tabIngredientsBtn" class="flex-1 pb-3 text-sm font-bold text-center border-b-2 ${activeTab === 'ingredients' ? 'border-brand-500 text-brand-600' : 'border-transparent text-slate-400 hover:text-slate-600'} cursor-pointer">
+                    <button id="tabIngredientsBtn" class="flex-1 pb-3 text-sm font-bold text-center border-b-2 transition-all duration-200 ${activeTab === 'ingredients' ? 'border-brand-500 text-brand-600' : 'border-transparent text-slate-400 hover:text-slate-600'} cursor-pointer">
                         <i class="fa-solid fa-basket-shopping mr-2"></i> Ingredients
                     </button>
-                    <button id="tabInstructionsBtn" class="flex-1 pb-3 text-sm font-bold text-center border-b-2 ${activeTab === 'instructions' ? 'border-brand-500 text-brand-600' : 'border-transparent text-slate-400 hover:text-slate-600'} cursor-pointer">
+                    <button id="tabInstructionsBtn" class="flex-1 pb-3 text-sm font-bold text-center border-b-2 transition-all duration-200 ${activeTab === 'instructions' ? 'border-brand-500 text-brand-600' : 'border-transparent text-slate-400 hover:text-slate-600'} cursor-pointer">
                         <i class="fa-solid fa-list-check mr-2"></i> Preparation Steps
                     </button>
                 </div>
 
-                <!-- Ingredients Checklist -->
-                <div id="ingredientsPanel" class="${activeTab === 'ingredients' ? 'block' : 'hidden'} space-y-3">
+                <!-- Serving Size Scaler Bar (Above Ingredients) -->
+                <div id="ingredientsPanel" class="${activeTab === 'ingredients' ? 'block' : 'hidden'} space-y-4">
+                    <div class="flex items-center justify-between bg-slate-50 border border-slate-200/80 rounded-2xl px-4 py-3">
+                        <div class="flex items-center gap-2">
+                            <i class="fa-solid fa-users text-slate-500 text-sm"></i>
+                            <span class="text-xs sm:text-sm font-bold text-slate-700">Serving Size:</span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <button id="decreaseServingsBtn" class="w-8 h-8 rounded-xl bg-white border border-slate-200 text-slate-700 font-bold hover:bg-slate-100 active:scale-90 flex items-center justify-center transition-all cursor-pointer shadow-sm">
+                                <i class="fa-solid fa-minus text-xs"></i>
+                            </button>
+                            <span id="servingsDisplay" class="text-sm font-extrabold text-brand-700 min-w-[3rem] text-center bg-brand-100/60 px-2.5 py-1 rounded-lg">
+                                ${currentServings} ${currentServings === 1 ? 'person' : 'people'}
+                            </span>
+                            <button id="increaseServingsBtn" class="w-8 h-8 rounded-xl bg-white border border-slate-200 text-slate-700 font-bold hover:bg-slate-100 active:scale-90 flex items-center justify-center transition-all cursor-pointer shadow-sm">
+                                <i class="fa-solid fa-plus text-xs"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Scaled Ingredients List -->
                     <ul class="grid grid-cols-1 md:grid-cols-2 gap-2.5">
                         ${recipe.ingredients.map((ing, idx) => `
-                            <li id="ing-item-${idx}" onclick="toggleIngredient(${idx})" class="flex items-center gap-3 p-3 bg-slate-50 hover:bg-slate-100 rounded-xl text-xs sm:text-sm text-slate-700 font-medium cursor-pointer select-none border border-slate-200/50">
-                                <input type="checkbox" id="ing-check-${idx}" class="w-4 h-4 rounded text-brand-600 focus:ring-brand-500 border-slate-300 pointer-events-none" onclick="event.stopPropagation()">
-                                <span id="ing-text-${idx}">${ing}</span>
+                            <li id="ing-item-${idx}" onclick="toggleIngredient(${idx})" class="flex items-center gap-3 p-3 bg-slate-50 hover:bg-slate-100 rounded-xl text-xs sm:text-sm text-slate-700 font-medium cursor-pointer select-none border border-slate-200/50 transition-all duration-150">
+                                <input type="checkbox" id="ing-check-${idx}" class="w-4 h-4 rounded text-brand-600 focus:ring-brand-500 border-slate-300 pointer-events-none transition-transform duration-150" onclick="event.stopPropagation()">
+                                <span id="ing-text-${idx}">${scaleIngredientText(ing, multiplier)}</span>
                             </li>
                         `).join('')}
                     </ul>
@@ -344,11 +434,11 @@ function renderCard({ recipe, isFallback, matchedTraits }) {
                 <div id="instructionsPanel" class="${activeTab === 'instructions' ? 'block' : 'hidden'}">
                     <ol class="space-y-3">
                         ${recipe.instructions.map((step, idx) => `
-                            <li id="step-item-${idx}" onclick="toggleStep(${idx})" class="flex gap-4 p-3.5 rounded-xl border border-slate-200/60 hover:bg-slate-50 cursor-pointer select-none">
-                                <span id="step-badge-${idx}" class="w-7 h-7 bg-brand-100 text-brand-700 font-bold rounded-full flex items-center justify-center text-xs shrink-0">
+                            <li id="step-item-${idx}" onclick="toggleStep(${idx})" class="flex gap-4 p-3.5 rounded-xl border border-slate-200/60 hover:bg-slate-50 cursor-pointer select-none transition-all duration-150">
+                                <span id="step-badge-${idx}" class="w-7 h-7 bg-brand-100 text-brand-700 font-bold rounded-full flex items-center justify-center text-xs shrink-0 transition-colors duration-150">
                                     ${idx + 1}
                                 </span>
-                                <p id="step-text-${idx}" class="text-xs sm:text-sm text-slate-700 leading-relaxed pt-0.5">${step}</p>
+                                <p id="step-text-${idx}" class="text-xs sm:text-sm text-slate-700 leading-relaxed pt-0.5 transition-colors duration-150">${step}</p>
                             </li>
                         `).join('')}
                     </ol>
@@ -357,15 +447,53 @@ function renderCard({ recipe, isFallback, matchedTraits }) {
         </div>
     `;
 
+    // Event Listeners for Recipe Card Actions
     document.getElementById('tabIngredientsBtn').addEventListener('click', () => switchTab('ingredients'));
     document.getElementById('tabInstructionsBtn').addEventListener('click', () => switchTab('instructions'));
-    document.getElementById('starBtn').addEventListener('click', () => toggleFavorite(recipe.id));
+    document.getElementById('starBtn').addEventListener('click', () => toggleFavorite(recipe));
     document.getElementById('markCookedBtn').addEventListener('click', () => logCookedMeal(recipe));
-    document.getElementById('dislikeBtn').addEventListener('click', () => toggleDislike(recipe.id));
+    document.getElementById('dislikeBtn').addEventListener('click', () => toggleDislike(recipe));
+
+    // Serving Stepper Event Listeners
+    document.getElementById('decreaseServingsBtn').addEventListener('click', () => {
+        if (currentServings > 1) {
+            currentServings--;
+            renderCard({ recipe, isFallback, matchedTraits });
+        }
+    });
+
+    document.getElementById('increaseServingsBtn').addEventListener('click', () => {
+        if (currentServings < 20) {
+            currentServings++;
+            renderCard({ recipe, isFallback, matchedTraits });
+        }
+    });
 
     if (isFallback) {
-        document.getElementById('fallbackSurpriseBtn').addEventListener('click', () => renderCard(findMeal(true)));
+        document.getElementById('fallbackSurpriseBtn').addEventListener('click', () => {
+            triggerInteractiveLoading(surpriseBtn, surpriseIcon, () => renderCard(findMeal(true)));
+        });
     }
+}
+
+/**
+ * Interactive Loading Animation Helper
+ * Triggers a complete 360-degree rotation over 400ms on action button icons.
+ */
+function triggerInteractiveLoading(buttonEl, iconEl, callback) {
+    if (!buttonEl || !iconEl) {
+        callback();
+        return;
+    }
+
+    buttonEl.classList.add('opacity-80', 'pointer-events-none');
+    iconEl.classList.add('animate-spin-full');
+
+    setTimeout(() => {
+        buttonEl.classList.remove('opacity-80', 'pointer-events-none');
+        iconEl.classList.remove('animate-spin-full');
+        callback();
+    }, 400);
 }
 
 // Inline Expandable Custom Filters Toggle
@@ -382,43 +510,47 @@ if (toggleInlineFiltersBtn) {
     });
 }
 
+// Main Action Buttons
 findMealBtn.addEventListener('click', () => {
-    renderCard(findMeal(false));
+    triggerInteractiveLoading(findMealBtn, findMealIcon, () => renderCard(findMeal(false)));
 });
 
 surpriseBtn.addEventListener('click', () => {
-    renderCard(findMeal(true));
+    triggerInteractiveLoading(surpriseBtn, surpriseIcon, () => renderCard(findMeal(true)));
 });
 
 // Helper User Actions
-function toggleFavorite(recipeId) {
+function toggleFavorite(recipe) {
+    const recipeId = recipe.id;
     if (favorites.includes(recipeId)) {
         favorites = favorites.filter(id => id !== recipeId);
+        showToast(`Removed "${recipe.name}" from Starred`, 'info');
     } else {
         favorites.push(recipeId);
+        showToast(`Starred "${recipe.name}"! (+15 points)`, 'amber');
     }
     localStorage.setItem(FAVORITES_KEY, JSON.stringify(favorites));
     updateBadges();
 
-    const currentRecipe = recipes.find(r => r.id === recipeId);
-    if (currentRecipe) renderCard({ recipe: currentRecipe, isFallback: false, matchedTraits: [] });
+    renderCard({ recipe, isFallback: false, matchedTraits: [] });
 }
 
-function toggleDislike(recipeId) {
+function toggleDislike(recipe) {
+    const recipeId = recipe.id;
     if (dislikedRecipes.includes(recipeId)) {
         dislikedRecipes = dislikedRecipes.filter(id => id !== recipeId);
         localStorage.setItem(DISLIKED_KEY, JSON.stringify(dislikedRecipes));
         updateBadges();
-        
-        const currentRecipe = recipes.find(r => r.id === recipeId);
-        if (currentRecipe) renderCard({ recipe: currentRecipe, isFallback: false, matchedTraits: [] });
+        showToast(`Removed "${recipe.name}" from Dislikes`, 'info');
+        renderCard({ recipe, isFallback: false, matchedTraits: [] });
     } else {
         dislikedRecipes.push(recipeId);
         localStorage.setItem(DISLIKED_KEY, JSON.stringify(dislikedRecipes));
         updateBadges();
+        showToast(`Disliked "${recipe.name}" (-8 pts penalty applied)`, 'rose');
 
-        // Automatically load a new meal when disliked
-        renderCard(findMeal(true));
+        // Pick a new surprise dish automatically
+        triggerInteractiveLoading(surpriseBtn, surpriseIcon, () => renderCard(findMeal(true)));
     }
 }
 
@@ -431,6 +563,8 @@ function logCookedMeal(recipe) {
     });
     localStorage.setItem(HISTORY_KEY, JSON.stringify(cookingHistory));
     updateBadges();
+
+    showToast(`Logged "${recipe.name}" to cooking history!`, 'success');
 
     const btn = document.getElementById('markCookedBtn');
     if (btn) {
@@ -467,11 +601,11 @@ function toggleStep(index) {
     if (!isCompleted) {
         row.classList.add('bg-slate-100/70', 'opacity-60');
         text.classList.add('line-through', 'text-slate-400');
-        badge.className = "w-7 h-7 bg-slate-200 text-slate-500 font-bold rounded-full flex items-center justify-center text-xs shrink-0";
+        badge.className = "w-7 h-7 bg-slate-200 text-slate-500 font-bold rounded-full flex items-center justify-center text-xs shrink-0 transition-colors duration-150";
     } else {
         row.classList.remove('bg-slate-100/70', 'opacity-60');
         text.classList.remove('line-through', 'text-slate-400');
-        badge.className = "w-7 h-7 bg-brand-100 text-brand-700 font-bold rounded-full flex items-center justify-center text-xs shrink-0";
+        badge.className = "w-7 h-7 bg-brand-100 text-brand-700 font-bold rounded-full flex items-center justify-center text-xs shrink-0 transition-colors duration-150";
     }
 }
 
@@ -485,13 +619,13 @@ function switchTab(tabName) {
     if (tabName === 'ingredients') {
         ingPanel.classList.remove('hidden');
         instPanel.classList.add('hidden');
-        tabIng.className = "flex-1 pb-3 text-sm font-bold text-center border-b-2 border-brand-500 text-brand-600 cursor-pointer";
-        tabInst.className = "flex-1 pb-3 text-sm font-bold text-center border-b-2 border-transparent text-slate-400 hover:text-slate-600 cursor-pointer";
+        tabIng.className = "flex-1 pb-3 text-sm font-bold text-center border-b-2 border-brand-500 text-brand-600 cursor-pointer transition-all duration-200";
+        tabInst.className = "flex-1 pb-3 text-sm font-bold text-center border-b-2 border-transparent text-slate-400 hover:text-slate-600 cursor-pointer transition-all duration-200";
     } else {
         ingPanel.classList.add('hidden');
         instPanel.classList.remove('hidden');
-        tabIng.className = "flex-1 pb-3 text-sm font-bold text-center border-b-2 border-transparent text-slate-400 hover:text-slate-600 cursor-pointer";
-        tabInst.className = "flex-1 pb-3 text-sm font-bold text-center border-b-2 border-brand-500 text-brand-600 cursor-pointer";
+        tabIng.className = "flex-1 pb-3 text-sm font-bold text-center border-b-2 border-transparent text-slate-400 hover:text-slate-600 cursor-pointer transition-all duration-200";
+        tabInst.className = "flex-1 pb-3 text-sm font-bold text-center border-b-2 border-brand-500 text-brand-600 cursor-pointer transition-all duration-200";
     }
 }
 
@@ -509,7 +643,7 @@ function closeDrawer() {
     drawerOverlay.classList.add('hidden');
 }
 
-// Drawer Event Listeners (Starred, Disliked, History)
+// Drawer Event Listeners
 if (viewFavoritesBtn) {
     viewFavoritesBtn.addEventListener('click', () => {
         const favoriteRecipes = recipes.filter(r => favorites.includes(r.id));
@@ -559,6 +693,7 @@ if (viewDislikesBtn) {
                 localStorage.setItem(DISLIKED_KEY, JSON.stringify([]));
                 updateBadges();
                 closeDrawer();
+                showToast('Cleared all disliked dishes!', 'info');
                 renderCard(findMeal(true));
             });
         }
@@ -591,6 +726,7 @@ if (viewHistoryBtn) {
                 localStorage.setItem(HISTORY_KEY, JSON.stringify([]));
                 updateBadges();
                 closeDrawer();
+                showToast('Cleared cooking log history!', 'info');
             });
         }
     });
@@ -598,9 +734,11 @@ if (viewHistoryBtn) {
 
 window.removeDislikeFromDrawer = function(event, recipeId) {
     event.stopPropagation();
+    const recipe = recipes.find(r => r.id === recipeId);
     dislikedRecipes = dislikedRecipes.filter(id => id !== recipeId);
     localStorage.setItem(DISLIKED_KEY, JSON.stringify(dislikedRecipes));
     updateBadges();
+    showToast(`Removed "${recipe ? recipe.name : 'dish'}" from Dislikes`, 'info');
     
     // Re-render Dislikes Drawer
     if (viewDislikesBtn) viewDislikesBtn.click();
