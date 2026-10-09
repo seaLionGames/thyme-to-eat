@@ -1,17 +1,19 @@
 /**
- * ThymeToEat - Application Logic
+ * ThymeToEat - Application Logic & Point-Based Weighted Randomization Engine
  */
 
 let recipes = [];
 let activeTab = 'ingredients';
 
+// LocalStorage Keys
 const FAVORITES_KEY = 'thymetoeat_favorites';
-const DISLIKES_KEY = 'thymetoeat_dislikes';
 const HISTORY_KEY = 'thymetoeat_history';
+const DISLIKED_KEY = 'thymetoeat_disliked';
 
+// State Management
 let favorites = JSON.parse(localStorage.getItem(FAVORITES_KEY)) || [];
-let dislikes = JSON.parse(localStorage.getItem(DISLIKES_KEY)) || [];
 let cookingHistory = JSON.parse(localStorage.getItem(HISTORY_KEY)) || [];
+let dislikedRecipes = JSON.parse(localStorage.getItem(DISLIKED_KEY)) || [];
 
 // DOM Controls
 const courseSelect = document.getElementById('courseSelect');
@@ -34,7 +36,6 @@ const chevronIcon = document.getElementById('chevronIcon');
 const viewFavoritesBtn = document.getElementById('viewFavoritesBtn');
 const viewDislikesBtn = document.getElementById('viewDislikesBtn');
 const viewHistoryBtn = document.getElementById('viewHistoryBtn');
-
 const starredCount = document.getElementById('starredCount');
 const dislikedCount = document.getElementById('dislikedCount');
 const historyCount = document.getElementById('historyCount');
@@ -46,50 +47,63 @@ const drawerContent = document.getElementById('drawerContent');
 const drawerFooter = document.getElementById('drawerFooter');
 const closeDrawerBtn = document.getElementById('closeDrawerBtn');
 
-// Weighted Random Engine with Dislike Penalties
+/**
+ * Point-Based Weight Calculation Engine
+ * - Base Weight: 10 pts
+ * - Direct Starred: +15 pts
+ * - Shared Trait with Starred (Cuisine, Course, or Style): +5 pts
+ * - Cooked History: +5 pts
+ * - Dislike Penalty: -8 pts (Minimum weight floor of 1)
+ */
+function calculateRecipeWeight(recipe) {
+    let weight = 10; // Baseline points
+
+    // 1. Direct Starred Check (+15 pts)
+    const isDirectlyStarred = favorites.includes(recipe.id);
+    if (isDirectlyStarred) {
+        weight += 15;
+    }
+
+    // 2. Shared Traits with Starred Dishes Check (+5 pts)
+    const starredRecipes = recipes.filter(r => favorites.includes(r.id));
+    const sharesTrait = starredRecipes.some(starred => 
+        starred.id !== recipe.id && (
+            starred.cuisine === recipe.cuisine ||
+            starred.course === recipe.course ||
+            starred.baseStyle === recipe.baseStyle
+        )
+    );
+    if (sharesTrait) {
+        weight += 5;
+    }
+
+    // 3. Cooked History Check (+5 pts)
+    const hasBeenCooked = cookingHistory.some(log => log.recipeId === recipe.id);
+    if (hasBeenCooked) {
+        weight += 5;
+    }
+
+    // 4. Disliked / Passed Penalty (-8 pts)
+    const isDisliked = dislikedRecipes.includes(recipe.id);
+    if (isDisliked) {
+        weight -= 8;
+    }
+
+    // Ensure weight floor of 1 so a disliked dish can still technically appear, albeit rarely
+    return Math.max(1, weight);
+}
+
+/**
+ * Weighted Random Pick Function
+ * Uses Cumulative Probability Distribution based on calculated point scores.
+ */
 function weightedRandomChoice(candidateItems) {
     if (!candidateItems || candidateItems.length === 0) return null;
 
-    // Filter out directly disliked recipes first
-    const eligibleCandidates = candidateItems.filter(r => !dislikes.includes(r.id));
-    if (eligibleCandidates.length === 0) {
-        // Fallback: If ALL candidates are disliked, pick from candidateItems directly
-        return candidateItems[Math.floor(Math.random() * candidateItems.length)];
-    }
-
-    // Retrieve full objects for all disliked recipes to analyze shared traits
-    const dislikedObjects = recipes.filter(r => dislikes.includes(r.id));
-
-    const weightedPool = eligibleCandidates.map(recipe => {
-        let weight = 1.0; // Base probability weight
-
-        // 1. STARRED BOOST (+Weight)
-        const starredRecipes = recipes.filter(r => favorites.includes(r.id));
-        starredRecipes.forEach(starred => {
-            if (starred.cuisine === recipe.cuisine) weight += 0.8;
-            if (starred.baseStyle === recipe.baseStyle) weight += 0.5;
-        });
-
-        // 2. VARIETY BOOST (+Weight for cuisines not cooked in last 5 meals)
-        const recentCooks = cookingHistory.slice(0, 5);
-        const recentCuisines = recentCooks.map(log => {
-            const match = recipes.find(r => r.id === log.recipeId);
-            return match ? match.cuisine : null;
-        });
-
-        if (!recentCuisines.includes(recipe.cuisine)) {
-            weight += 0.9;
-        }
-
-        // 3. DISLIKE CATEGORY PENALTY (-Weight for sharing traits with downvoted meals)
-        dislikedObjects.forEach(disliked => {
-            if (disliked.cuisine === recipe.cuisine) weight *= 0.6;   // 40% penalty
-            if (disliked.protein === recipe.protein) weight *= 0.6;   // 40% penalty
-            if (disliked.baseStyle === recipe.baseStyle) weight *= 0.6; // 40% penalty
-        });
-
-        return { recipe, weight: Math.max(weight, 0.05) }; // Ensure weight never drops below 0.05
-    });
+    const weightedPool = candidateItems.map(recipe => ({
+        recipe,
+        weight: calculateRecipeWeight(recipe)
+    }));
 
     const totalWeight = weightedPool.reduce((sum, item) => sum + item.weight, 0);
     let randomThreshold = Math.random() * totalWeight;
@@ -101,13 +115,13 @@ function weightedRandomChoice(candidateItems) {
         randomThreshold -= item.weight;
     }
 
-    return eligibleCandidates[0];
+    return candidateItems[0];
 }
 
 function updateBadges() {
-    starredCount.textContent = favorites.length;
-    dislikedCount.textContent = dislikes.length;
-    historyCount.textContent = cookingHistory.length;
+    if (starredCount) starredCount.textContent = favorites.length;
+    if (dislikedCount) dislikedCount.textContent = dislikedRecipes.length;
+    if (historyCount) historyCount.textContent = cookingHistory.length;
 }
 
 // Fetch Dataset
@@ -127,13 +141,13 @@ async function loadRecipes() {
             <div class="bg-red-50 text-red-700 rounded-2xl p-6 border border-red-200 text-center">
                 <i class="fa-solid fa-triangle-exclamation text-2xl mb-2"></i>
                 <p class="font-bold">Failed to load recipe library.</p>
-                <p class="text-xs mt-1">Make sure you are serving files via a local web server.</p>
+                <p class="text-xs mt-1">Make sure you are serving files via a local web server (e.g., Live Server).</p>
             </div>
         `;
     }
 }
 
-// Filter Engine
+// Filter Matching Engine
 function findMeal(forceRandom = false) {
     if (forceRandom) {
         courseSelect.value = 'Any';
@@ -215,7 +229,7 @@ function getDifficultyBadgeClass(difficulty) {
     }
 }
 
-// Render Recipe Card
+// Render Recipe Card View
 function renderCard({ recipe, isFallback, matchedTraits }) {
     if (!recipe) {
         resultContainer.innerHTML = `
@@ -235,7 +249,7 @@ function renderCard({ recipe, isFallback, matchedTraits }) {
     }
 
     const isStarred = favorites.includes(recipe.id);
-    const isDisliked = dislikes.includes(recipe.id);
+    const isDisliked = dislikedRecipes.includes(recipe.id);
 
     resultContainer.innerHTML = `
         <div class="bg-white rounded-3xl overflow-hidden shadow-2xl border border-slate-100 animate-pop-in w-full">
@@ -259,7 +273,8 @@ function renderCard({ recipe, isFallback, matchedTraits }) {
                                 <button id="starBtn" class="text-2xl cursor-pointer ${isStarred ? 'text-amber-300' : 'text-white/40 hover:text-white'}" title="${isStarred ? 'Remove from favorites' : 'Add to favorites'}">
                                     <i class="${isStarred ? 'fa-solid' : 'fa-regular'} fa-star"></i>
                                 </button>
-                                <button id="dislikeBtn" class="text-2xl cursor-pointer ${isDisliked ? 'text-rose-400' : 'text-white/40 hover:text-white'}" title="${isDisliked ? 'Remove from Dislikes' : 'Mark as Disliked'}">
+                                <!-- Dislike / Thumbs-Down Icon Button -->
+                                <button id="dislikeBtn" class="text-xl cursor-pointer transition-colors ${isDisliked ? 'text-rose-300' : 'text-white/40 hover:text-rose-200'}" title="${isDisliked ? 'In Dislike List (-8 pts)' : 'Dislike dish (-8 pts penalty)'}">
                                     <i class="fa-solid fa-thumbs-down"></i>
                                 </button>
                             </div>
@@ -269,13 +284,14 @@ function renderCard({ recipe, isFallback, matchedTraits }) {
                         </div>
                     </div>
 
+                    <!-- Mark as Cooked Action -->
                     <button id="markCookedBtn" class="w-full sm:w-auto px-4 py-2.5 bg-white/20 hover:bg-white/30 backdrop-blur-md text-white border border-white/30 rounded-xl text-xs sm:text-sm font-semibold flex items-center justify-center gap-2 transition-all cursor-pointer">
                         <i class="fa-solid fa-circle-check text-emerald-300"></i>
                         <span>Mark as Cooked</span>
                     </button>
                 </div>
 
-                <!-- Tags -->
+                <!-- Meta Tags -->
                 <div class="flex flex-wrap gap-2 mt-6">
                     <span class="px-3 py-1 bg-purple-500/20 text-purple-100 font-semibold text-xs rounded-full border border-purple-400/30">
                         🍽 ${recipe.course}
@@ -298,7 +314,7 @@ function renderCard({ recipe, isFallback, matchedTraits }) {
                 </div>
             </div>
 
-            <!-- Details -->
+            <!-- Recipe Details Body -->
             <div class="p-6 sm:p-8">
                 <p class="text-slate-600 leading-relaxed mb-6 font-normal text-sm sm:text-base">${recipe.description}</p>
 
@@ -312,7 +328,7 @@ function renderCard({ recipe, isFallback, matchedTraits }) {
                     </button>
                 </div>
 
-                <!-- Ingredients -->
+                <!-- Ingredients Checklist -->
                 <div id="ingredientsPanel" class="${activeTab === 'ingredients' ? 'block' : 'hidden'} space-y-3">
                     <ul class="grid grid-cols-1 md:grid-cols-2 gap-2.5">
                         ${recipe.ingredients.map((ing, idx) => `
@@ -324,7 +340,7 @@ function renderCard({ recipe, isFallback, matchedTraits }) {
                     </ul>
                 </div>
 
-                <!-- Instructions -->
+                <!-- Instructions Steps -->
                 <div id="instructionsPanel" class="${activeTab === 'instructions' ? 'block' : 'hidden'}">
                     <ol class="space-y-3">
                         ${recipe.instructions.map((step, idx) => `
@@ -344,8 +360,8 @@ function renderCard({ recipe, isFallback, matchedTraits }) {
     document.getElementById('tabIngredientsBtn').addEventListener('click', () => switchTab('ingredients'));
     document.getElementById('tabInstructionsBtn').addEventListener('click', () => switchTab('instructions'));
     document.getElementById('starBtn').addEventListener('click', () => toggleFavorite(recipe.id));
-    document.getElementById('dislikeBtn').addEventListener('click', () => toggleDislike(recipe.id));
     document.getElementById('markCookedBtn').addEventListener('click', () => logCookedMeal(recipe));
+    document.getElementById('dislikeBtn').addEventListener('click', () => toggleDislike(recipe.id));
 
     if (isFallback) {
         document.getElementById('fallbackSurpriseBtn').addEventListener('click', () => renderCard(findMeal(true)));
@@ -353,16 +369,18 @@ function renderCard({ recipe, isFallback, matchedTraits }) {
 }
 
 // Inline Expandable Custom Filters Toggle
-toggleInlineFiltersBtn.addEventListener('click', () => {
-    const isHidden = expandedFiltersPanel.classList.contains('hidden');
-    if (isHidden) {
-        expandedFiltersPanel.classList.remove('hidden');
-        chevronIcon.classList.add('rotate-180');
-    } else {
-        expandedFiltersPanel.classList.add('hidden');
-        chevronIcon.classList.remove('rotate-180');
-    }
-});
+if (toggleInlineFiltersBtn) {
+    toggleInlineFiltersBtn.addEventListener('click', () => {
+        const isHidden = expandedFiltersPanel.classList.contains('hidden');
+        if (isHidden) {
+            expandedFiltersPanel.classList.remove('hidden');
+            if (chevronIcon) chevronIcon.classList.add('rotate-180');
+        } else {
+            expandedFiltersPanel.classList.add('hidden');
+            if (chevronIcon) chevronIcon.classList.remove('rotate-180');
+        }
+    });
+}
 
 findMealBtn.addEventListener('click', () => {
     renderCard(findMeal(false));
@@ -372,15 +390,12 @@ surpriseBtn.addEventListener('click', () => {
     renderCard(findMeal(true));
 });
 
-// User Actions (Favorites & Dislikes)
+// Helper User Actions
 function toggleFavorite(recipeId) {
     if (favorites.includes(recipeId)) {
         favorites = favorites.filter(id => id !== recipeId);
     } else {
         favorites.push(recipeId);
-        // Remove from dislikes if favorited
-        dislikes = dislikes.filter(id => id !== recipeId);
-        localStorage.setItem(DISLIKES_KEY, JSON.stringify(dislikes));
     }
     localStorage.setItem(FAVORITES_KEY, JSON.stringify(favorites));
     updateBadges();
@@ -390,19 +405,21 @@ function toggleFavorite(recipeId) {
 }
 
 function toggleDislike(recipeId) {
-    if (dislikes.includes(recipeId)) {
-        dislikes = dislikes.filter(id => id !== recipeId);
+    if (dislikedRecipes.includes(recipeId)) {
+        dislikedRecipes = dislikedRecipes.filter(id => id !== recipeId);
+        localStorage.setItem(DISLIKED_KEY, JSON.stringify(dislikedRecipes));
+        updateBadges();
+        
+        const currentRecipe = recipes.find(r => r.id === recipeId);
+        if (currentRecipe) renderCard({ recipe: currentRecipe, isFallback: false, matchedTraits: [] });
     } else {
-        dislikes.push(recipeId);
-        // Remove from favorites if downvoted
-        favorites = favorites.filter(id => id !== recipeId);
-        localStorage.setItem(FAVORITES_KEY, JSON.stringify(favorites));
-    }
-    localStorage.setItem(DISLIKES_KEY, JSON.stringify(dislikes));
-    updateBadges();
+        dislikedRecipes.push(recipeId);
+        localStorage.setItem(DISLIKED_KEY, JSON.stringify(dislikedRecipes));
+        updateBadges();
 
-    // Recommend a new non-disliked meal immediately
-    renderCard(findMeal(true));
+        // Automatically load a new meal when disliked
+        renderCard(findMeal(true));
+    }
 }
 
 function logCookedMeal(recipe) {
@@ -478,7 +495,7 @@ function switchTab(tabName) {
     }
 }
 
-// Drawer Drawer Methods
+// Side Drawer Operations
 function openDrawer(title, contentHtml, footerHtml = '') {
     drawerTitle.textContent = title;
     drawerContent.innerHTML = contentHtml;
@@ -492,72 +509,102 @@ function closeDrawer() {
     drawerOverlay.classList.add('hidden');
 }
 
-viewFavoritesBtn.addEventListener('click', () => {
-    const favoriteRecipes = recipes.filter(r => favorites.includes(r.id));
-    let contentHtml = favoriteRecipes.length === 0 
-        ? `<div class="text-center py-12 text-slate-400"><p class="font-semibold text-slate-600">No starred recipes yet!</p></div>`
-        : favoriteRecipes.map(r => `
-            <div onclick="selectRecipeFromDrawer(${r.id})" class="p-4 bg-slate-50 hover:bg-slate-100 rounded-2xl border flex items-center justify-between cursor-pointer">
-                <div class="flex items-center space-x-3">
-                    <span class="text-2xl">${r.emoji}</span>
-                    <div><h4 class="font-bold text-slate-800 text-sm">${r.name}</h4><p class="text-xs text-slate-400">${r.course}</p></div>
+// Drawer Event Listeners (Starred, Disliked, History)
+if (viewFavoritesBtn) {
+    viewFavoritesBtn.addEventListener('click', () => {
+        const favoriteRecipes = recipes.filter(r => favorites.includes(r.id));
+        let contentHtml = favoriteRecipes.length === 0 
+            ? `<div class="text-center py-12 text-slate-400"><p class="font-semibold text-slate-600">No starred recipes yet!</p></div>`
+            : favoriteRecipes.map(r => `
+                <div onclick="selectRecipeFromDrawer(${r.id})" class="p-4 bg-slate-50 hover:bg-slate-100 rounded-2xl border border-slate-100 flex items-center justify-between cursor-pointer transition-colors">
+                    <div class="flex items-center space-x-3">
+                        <span class="text-2xl">${r.emoji}</span>
+                        <div><h4 class="font-bold text-slate-800 text-sm">${r.name}</h4><p class="text-xs text-slate-400">${r.course}</p></div>
+                    </div>
+                    <i class="fa-solid fa-chevron-right text-slate-300 text-xs"></i>
                 </div>
-                <button onclick="event.stopPropagation(); toggleFavorite(${r.id}); viewFavoritesBtn.click();" class="text-amber-500 hover:text-amber-600 p-2 text-sm cursor-pointer">
-                    <i class="fa-solid fa-star"></i>
-                </button>
-            </div>
-        `).join('');
+            `).join('');
 
-    openDrawer('Starred Dishes', contentHtml);
-});
+        openDrawer('Starred Dishes', contentHtml);
+    });
+}
 
-viewDislikesBtn.addEventListener('click', () => {
-    const dislikedRecipes = recipes.filter(r => dislikes.includes(r.id));
-    let contentHtml = dislikedRecipes.length === 0
-        ? `<div class="text-center py-12 text-slate-400"><p class="font-semibold text-slate-600">No disliked recipes!</p></div>`
-        : dislikedRecipes.map(r => `
-            <div class="p-4 bg-slate-50 rounded-2xl border flex items-center justify-between">
-                <div class="flex items-center space-x-3">
-                    <span class="text-2xl">${r.emoji}</span>
-                    <div><h4 class="font-bold text-slate-800 text-sm">${r.name}</h4><p class="text-xs text-slate-400">${r.course}</p></div>
+if (viewDislikesBtn) {
+    viewDislikesBtn.addEventListener('click', () => {
+        const dislikedList = recipes.filter(r => dislikedRecipes.includes(r.id));
+        let contentHtml = dislikedList.length === 0 
+            ? `<div class="text-center py-12 text-slate-400"><p class="font-semibold text-slate-600">No disliked dishes!</p></div>`
+            : dislikedList.map(r => `
+                <div class="p-3.5 bg-slate-50 rounded-2xl border border-slate-100 flex items-center justify-between">
+                    <div onclick="selectRecipeFromDrawer(${r.id})" class="flex items-center space-x-3 cursor-pointer flex-1">
+                        <span class="text-2xl">${r.emoji}</span>
+                        <div><h4 class="font-bold text-slate-800 text-sm">${r.name}</h4><p class="text-xs text-slate-400">${r.course}</p></div>
+                    </div>
+                    <button onclick="removeDislikeFromDrawer(event, ${r.id})" class="text-xs text-rose-500 font-semibold px-2.5 py-1.5 hover:bg-rose-100/60 rounded-lg transition-colors cursor-pointer" title="Remove from dislike list">
+                        Remove
+                    </button>
                 </div>
-                <button onclick="toggleDislike(${r.id}); viewDislikesBtn.click();" class="text-xs font-bold text-rose-600 hover:text-rose-700 bg-rose-50 px-3 py-1.5 rounded-lg border border-rose-200 cursor-pointer">
-                    Remove
-                </button>
-            </div>
-        `).join('');
+            `).join('');
 
-    openDrawer('Disliked Dishes', contentHtml);
-});
+        const footerHtml = dislikedList.length > 0 ? `
+            <button id="clearDislikesBtn" class="w-full py-2.5 bg-rose-50 text-rose-600 text-xs font-bold rounded-xl border border-rose-200 cursor-pointer hover:bg-rose-100 transition-colors">Clear All Dislikes</button>
+        ` : '';
 
-viewHistoryBtn.addEventListener('click', () => {
-    let contentHtml = cookingHistory.length === 0
-        ? `<div class="text-center py-12 text-slate-400"><p class="font-semibold text-slate-600">No cooking log history</p></div>`
-        : cookingHistory.map(entry => `
-            <div class="p-3.5 bg-slate-50 rounded-2xl border flex items-center justify-between">
-                <div class="flex items-center space-x-3">
-                    <span class="text-2xl">${entry.emoji}</span>
-                    <div><h4 class="font-bold text-slate-800 text-sm">${entry.name}</h4><p class="text-[11px] text-slate-400">${entry.timestamp}</p></div>
+        openDrawer('Disliked Dishes', contentHtml, footerHtml);
+
+        const clearBtn = document.getElementById('clearDislikesBtn');
+        if (clearBtn) {
+            clearBtn.addEventListener('click', () => {
+                dislikedRecipes = [];
+                localStorage.setItem(DISLIKED_KEY, JSON.stringify([]));
+                updateBadges();
+                closeDrawer();
+                renderCard(findMeal(true));
+            });
+        }
+    });
+}
+
+if (viewHistoryBtn) {
+    viewHistoryBtn.addEventListener('click', () => {
+        let contentHtml = cookingHistory.length === 0
+            ? `<div class="text-center py-12 text-slate-400"><p class="font-semibold text-slate-600">No cooking log history</p></div>`
+            : cookingHistory.map(entry => `
+                <div class="p-3.5 bg-slate-50 rounded-2xl border border-slate-100 flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        <span class="text-2xl">${entry.emoji}</span>
+                        <div><h4 class="font-bold text-slate-800 text-sm">${entry.name}</h4><p class="text-[11px] text-slate-400">${entry.timestamp}</p></div>
+                    </div>
                 </div>
-            </div>
-        `).join('');
+            `).join('');
 
-    const footerHtml = cookingHistory.length > 0 ? `
-        <button id="clearHistoryBtn" class="w-full py-2.5 bg-red-50 text-red-600 text-xs font-bold rounded-xl border border-red-200 cursor-pointer">Clear History</button>
-    ` : '';
+        const footerHtml = cookingHistory.length > 0 ? `
+            <button id="clearHistoryBtn" class="w-full py-2.5 bg-red-50 text-red-600 text-xs font-bold rounded-xl border border-red-200 cursor-pointer hover:bg-red-100 transition-colors">Clear History</button>
+        ` : '';
 
-    openDrawer('Cooking Log', contentHtml, footerHtml);
+        openDrawer('Cooking Log', contentHtml, footerHtml);
 
-    const clearBtn = document.getElementById('clearHistoryBtn');
-    if (clearBtn) {
-        clearBtn.addEventListener('click', () => {
-            cookingHistory = [];
-            localStorage.setItem(HISTORY_KEY, JSON.stringify([]));
-            updateBadges();
-            closeDrawer();
-        });
-    }
-});
+        const clearBtn = document.getElementById('clearHistoryBtn');
+        if (clearBtn) {
+            clearBtn.addEventListener('click', () => {
+                cookingHistory = [];
+                localStorage.setItem(HISTORY_KEY, JSON.stringify([]));
+                updateBadges();
+                closeDrawer();
+            });
+        }
+    });
+}
+
+window.removeDislikeFromDrawer = function(event, recipeId) {
+    event.stopPropagation();
+    dislikedRecipes = dislikedRecipes.filter(id => id !== recipeId);
+    localStorage.setItem(DISLIKED_KEY, JSON.stringify(dislikedRecipes));
+    updateBadges();
+    
+    // Re-render Dislikes Drawer
+    if (viewDislikesBtn) viewDislikesBtn.click();
+};
 
 window.selectRecipeFromDrawer = function(recipeId) {
     const selected = recipes.find(r => r.id === recipeId);
@@ -567,7 +614,8 @@ window.selectRecipeFromDrawer = function(recipeId) {
     }
 };
 
-closeDrawerBtn.addEventListener('click', closeDrawer);
-drawerOverlay.addEventListener('click', closeDrawer);
+if (closeDrawerBtn) closeDrawerBtn.addEventListener('click', closeDrawer);
+if (drawerOverlay) drawerOverlay.addEventListener('click', closeDrawer);
 
+// Initialize App
 document.addEventListener('DOMContentLoaded', loadRecipes);
