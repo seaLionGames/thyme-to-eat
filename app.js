@@ -1099,8 +1099,25 @@ function setMode(mode) {
 
 function fetchWithTimeout(url, options = {}, timeoutMs = 5000) {
     const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), timeoutMs);
-    return fetch(url, { ...options, signal: controller.signal }).finally(() => clearTimeout(timer));
+    const timer = setTimeout(() => {
+        controller.abort(new DOMException(`Request timed out after ${Math.round(timeoutMs / 1000)}s`, 'TimeoutError'));
+    }, timeoutMs);
+    return fetch(url, { ...options, signal: controller.signal })
+        .catch((err) => {
+            if (err?.name === 'AbortError' || controller.signal.aborted) {
+                const reason = controller.signal.reason;
+                const message =
+                    (reason && (reason.message || String(reason))) ||
+                    err?.message ||
+                    `Request timed out after ${Math.round(timeoutMs / 1000)}s`;
+                const timeoutErr = new Error(message);
+                timeoutErr.name = reason?.name === 'TimeoutError' ? 'TimeoutError' : err?.name || 'AbortError';
+                timeoutErr.cause = err;
+                throw timeoutErr;
+            }
+            throw err;
+        })
+        .finally(() => clearTimeout(timer));
 }
 
 function haversineKm(lat1, lon1, lat2, lon2) {
@@ -1210,8 +1227,10 @@ function buildOverpassQuery(lat, lon, radiusMeters, placeType) {
             ? `["amenity"="${placeType}"]`
             : '["amenity"~"^(restaurant|fast_food|cafe|food_court)$"]';
 
+    // Server-side budget aligned with OVERPASS_TIMEOUT_MS (2 minutes)
+    const serverTimeoutSec = Math.max(10, Math.round(OVERPASS_TIMEOUT_MS / 1000));
     return `
-[out:json][timeout:10];
+[out:json][timeout:${serverTimeoutSec}];
 node${amenityFilter}(around:${radiusMeters},${lat},${lon});
 out tags 30;
 `.trim();
@@ -1252,6 +1271,17 @@ async function fetchOverpass(query) {
                 errors.push(err);
                 remaining -= 1;
                 if (remaining === 0 && !settled) {
+                    const allTimedOut = errors.length > 0 && errors.every(
+                        (e) => e?.name === 'TimeoutError' || /timed out/i.test(e?.message || '')
+                    );
+                    if (allTimedOut) {
+                        reject(
+                            new Error(
+                                `All Overpass mirrors timed out after ${Math.round(OVERPASS_TIMEOUT_MS / 1000)}s — they may be busy. Try again shortly.`
+                            )
+                        );
+                        return;
+                    }
                     reject(errors[errors.length - 1] || new Error('All Overpass mirrors failed.'));
                 }
             });
@@ -1354,7 +1384,7 @@ async function searchNearbyRestaurants({ surprise = false } = {}) {
         if (places) {
             updateRestaurantLoadingDetail('Loaded from recent cache…');
         } else {
-            updateRestaurantLoadingDetail('Racing free Overpass mirrors…');
+            updateRestaurantLoadingDetail('Racing free Overpass mirrors (may take up to 2 min when busy)…');
             const query = buildOverpassQuery(location.lat, location.lon, radius, placeType);
             const { data, endpoint } = await fetchOverpass(query);
             updateRestaurantLoadingDetail(`Got response from ${endpoint.replace('https://', '').split('/')[0]}…`);
