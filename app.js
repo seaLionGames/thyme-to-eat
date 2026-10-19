@@ -35,7 +35,7 @@ const OVERPASS_ENDPOINTS = [
 ];
 const GEOJS_URL = 'https://get.geojs.io/v1/ip/geo.json';
 const GEO_TIMEOUT_MS = 3500;
-const OVERPASS_TIMEOUT_MS = 8000;
+const OVERPASS_TIMEOUT_MS = 2 * 60 * 1000; // free mirrors can be slow/busy
 const IP_TIMEOUT_MS = 2500;
 
 const CUISINE_KEYWORD_MAP = {
