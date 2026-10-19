@@ -46,6 +46,8 @@ const CUISINE_KEYWORD_MAP = {
 };
 
 // DOM Controls
+const searchInput = document.getElementById('searchInput');
+const clearSearchBtn = document.getElementById('clearSearchBtn');
 const courseSelect = document.getElementById('courseSelect');
 const cuisineSelect = document.getElementById('cuisineSelect');
 const proteinSelect = document.getElementById('proteinSelect');
@@ -54,8 +56,10 @@ const difficultySelect = document.getElementById('difficultySelect');
 const moodSelect = document.getElementById('moodSelect');
 
 const findMealBtn = document.getElementById('findMealBtn');
+const searchAllMatchesBtn = document.getElementById('searchAllMatchesBtn');
 const surpriseBtn = document.getElementById('surpriseBtn');
 const findMealIcon = document.getElementById('findMealIcon');
+const searchAllIcon = document.getElementById('searchAllIcon');
 const surpriseIcon = document.getElementById('surpriseIcon');
 const findMealBtnLabel = document.getElementById('findMealBtnLabel');
 const surpriseBtnLabel = document.getElementById('surpriseBtnLabel');
@@ -214,9 +218,52 @@ async function loadRecipes() {
     }
 }
 
-// Filter Matching Engine
+/**
+ * Filter Matching Engine
+ * Filters recipes against search bar text & active dropdown criteria.
+ */
+function filterRecipes({ ignoreKeyword = false } = {}) {
+    const query = ignoreKeyword ? '' : (searchInput ? searchInput.value.trim().toLowerCase() : '');
+    const filters = {
+        course: courseSelect.value,
+        cuisine: cuisineSelect.value,
+        protein: proteinSelect.value,
+        baseStyle: styleSelect.value,
+        difficulty: difficultySelect.value,
+        mood: moodSelect.value
+    };
+
+    const activeFilters = Object.entries(filters).filter(([_, val]) => val !== 'Any');
+
+    return recipes.filter(recipe => {
+        // Keyword search matching name, description, ingredients, or tags
+        if (query) {
+            const nameMatch = recipe.name.toLowerCase().includes(query);
+            const descMatch = recipe.description ? recipe.description.toLowerCase().includes(query) : false;
+            const ingMatch = recipe.ingredients ? recipe.ingredients.some(i => i.toLowerCase().includes(query)) : false;
+            const tagMatch = [recipe.course, recipe.cuisine, recipe.protein, recipe.baseStyle, recipe.mood, recipe.difficulty]
+                .some(tag => tag && tag.toLowerCase().includes(query));
+
+            if (!nameMatch && !descMatch && !ingMatch && !tagMatch) {
+                return false;
+            }
+        }
+
+        // Dropdown criteria matching
+        for (const [key, val] of activeFilters) {
+            if (recipe[key] !== val) {
+                return false;
+            }
+        }
+
+        return true;
+    });
+}
+
 function findMeal(forceRandom = false) {
     if (forceRandom) {
+        if (searchInput) searchInput.value = '';
+        if (clearSearchBtn) clearSearchBtn.classList.add('hidden');
         courseSelect.value = 'Any';
         cuisineSelect.value = 'Any';
         proteinSelect.value = 'Any';
@@ -231,6 +278,17 @@ function findMeal(forceRandom = false) {
         };
     }
 
+    const matches = filterRecipes();
+
+    if (matches.length > 0) {
+        return {
+            recipe: weightedRandomChoice(matches),
+            isFallback: false,
+            matchedTraits: []
+        };
+    }
+
+    // Fallback: Relax search criteria if no exact match is found
     const filters = {
         course: courseSelect.value,
         cuisine: cuisineSelect.value,
@@ -239,9 +297,7 @@ function findMeal(forceRandom = false) {
         difficulty: difficultySelect.value,
         mood: moodSelect.value
     };
-
     const activeFilters = Object.entries(filters).filter(([_, val]) => val !== 'Any');
-    const totalActiveCriteria = activeFilters.length;
 
     const scoredRecipes = recipes.map(recipe => {
         let score = 0;
@@ -256,17 +312,6 @@ function findMeal(forceRandom = false) {
 
         return { recipe, score, matchedTraits };
     });
-
-    const exactMatches = scoredRecipes.filter(item => item.score === totalActiveCriteria);
-
-    if (exactMatches.length > 0) {
-        const candidateRecipes = exactMatches.map(m => m.recipe);
-        return {
-            recipe: weightedRandomChoice(candidateRecipes),
-            isFallback: false,
-            matchedTraits: []
-        };
-    }
 
     const sortedCandidates = scoredRecipes.sort((a, b) => b.score - a.score);
     const highestScore = sortedCandidates[0]?.score || 0;
@@ -286,6 +331,120 @@ function findMeal(forceRandom = false) {
 
     return { recipe: null, isFallback: false, matchedTraits: [] };
 }
+
+/**
+ * Render Search Directory View
+ * Displays a responsive grid of all matching recipes with summary cards.
+ */
+function renderSearchResults() {
+    const matches = filterRecipes();
+
+    if (matches.length === 0) {
+        resultContainer.innerHTML = `
+            <div class="bg-white rounded-3xl p-8 border border-slate-200 text-center shadow-lg animate-pop-in w-full">
+                <div class="text-5xl mb-4">🔍</div>
+                <h3 class="text-xl font-bold text-slate-800 mb-2">No matching dishes found</h3>
+                <p class="text-slate-500 max-w-md mx-auto mb-6 text-sm">We couldn't find any recipes matching your current search query or filter settings. Try broadening your keywords or clearing your filters!</p>
+                <div class="flex flex-wrap justify-center gap-3">
+                    <button id="clearFiltersDirectoryBtn" class="bg-brand-600 hover:bg-brand-700 text-white font-semibold py-2.5 px-5 rounded-xl transition-all cursor-pointer text-sm">
+                        Clear Search & Filters
+                    </button>
+                    <button id="surpriseDirectoryBtn" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2.5 px-5 rounded-xl transition-all cursor-pointer text-sm">
+                        Surprise Me Instead
+                    </button>
+                </div>
+            </div>
+        `;
+
+        document.getElementById('clearFiltersDirectoryBtn')?.addEventListener('click', () => {
+            if (searchInput) searchInput.value = '';
+            if (clearSearchBtn) clearSearchBtn.classList.add('hidden');
+            courseSelect.value = 'Any';
+            cuisineSelect.value = 'Any';
+            proteinSelect.value = 'Any';
+            styleSelect.value = 'Any';
+            difficultySelect.value = 'Any';
+            moodSelect.value = 'Any';
+            renderSearchResults();
+        });
+
+        document.getElementById('surpriseDirectoryBtn')?.addEventListener('click', () => {
+            triggerInteractiveLoading(surpriseBtn, surpriseIcon, () => renderCard(findMeal(true)));
+        });
+
+        return;
+    }
+
+    resultContainer.innerHTML = `
+        <div class="space-y-4 animate-pop-in w-full">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 bg-slate-100/80 border border-slate-200/80 rounded-2xl px-5 py-3.5">
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-list-check text-brand-600"></i>
+                    <span class="text-sm font-bold text-slate-800">Found <span class="text-brand-700 font-extrabold">${matches.length}</span> matching meal${matches.length === 1 ? '' : 's'}</span>
+                </div>
+                <button id="directoryRandomPickBtn" class="text-xs font-semibold text-brand-700 bg-white hover:bg-brand-50 border border-brand-200 px-3.5 py-1.5 rounded-xl cursor-pointer transition-colors shadow-sm self-start sm:self-auto">
+                    <i class="fa-solid fa-dice mr-1 text-brand-500"></i> Pick Random Match
+                </button>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                ${matches.map(recipe => {
+                    const isStarred = favorites.includes(recipe.id);
+                    const isDisliked = dislikedRecipes.includes(recipe.id);
+                    return `
+                        <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-md hover:shadow-lg transition-all flex flex-col justify-between space-y-4 relative">
+                            <div>
+                                <div class="flex items-start justify-between gap-3 mb-2">
+                                    <div class="flex items-center space-x-3">
+                                        <div class="w-12 h-12 bg-slate-100 rounded-xl flex items-center justify-center text-2xl shrink-0">
+                                            ${recipe.emoji}
+                                        </div>
+                                        <div>
+                                            <h4 class="font-bold text-slate-900 text-base leading-snug">${escapeHtml(recipe.name)}</h4>
+                                            <p class="text-xs text-slate-400 mt-0.5"><i class="fa-regular fa-clock mr-1"></i>${recipe.prepTime}</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center gap-1 shrink-0">
+                                        ${isStarred ? '<i class="fa-solid fa-star text-amber-400 text-xs" title="Starred"></i>' : ''}
+                                        ${isDisliked ? '<i class="fa-solid fa-thumbs-down text-rose-400 text-xs" title="Disliked"></i>' : ''}
+                                    </div>
+                                </div>
+                                <p class="text-xs text-slate-500 line-clamp-2 leading-relaxed mb-3">${escapeHtml(recipe.description)}</p>
+                                <div class="flex flex-wrap gap-1.5">
+                                    <span class="px-2 py-0.5 bg-slate-100 text-slate-600 font-semibold text-[10px] rounded-md">
+                                        🍽 ${recipe.course}
+                                    </span>
+                                    <span class="px-2 py-0.5 bg-slate-100 text-slate-600 font-semibold text-[10px] rounded-md">
+                                        🌍 ${recipe.cuisine}
+                                    </span>
+                                    <span class="px-2 py-0.5 bg-slate-100 text-slate-600 font-semibold text-[10px] rounded-md">
+                                        ⚡ ${recipe.difficulty}
+                                    </span>
+                                </div>
+                            </div>
+                            <button onclick="viewDetailedRecipe(${recipe.id})" class="w-full bg-brand-50 hover:bg-brand-100 text-brand-700 font-bold text-xs py-2.5 px-4 rounded-xl border border-brand-200/60 transition-colors cursor-pointer flex items-center justify-center gap-1.5">
+                                <span>View Recipe</span>
+                                <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                            </button>
+                        </div>
+                    `;
+                }).join('')}
+            </div>
+        </div>
+    `;
+
+    document.getElementById('directoryRandomPickBtn')?.addEventListener('click', () => {
+        const randomPick = weightedRandomChoice(matches);
+        if (randomPick) renderCard({ recipe: randomPick, isFallback: false, matchedTraits: [] });
+    });
+}
+
+window.viewDetailedRecipe = function(recipeId) {
+    const selected = recipes.find(r => r.id === recipeId);
+    if (selected) {
+        renderCard({ recipe: selected, isFallback: false, matchedTraits: [] });
+    }
+};
 
 function getDifficultyBadgeClass(difficulty) {
     switch (difficulty) {
@@ -342,7 +501,7 @@ function renderCard({ recipe, isFallback, matchedTraits }) {
             <div class="bg-white rounded-3xl p-8 border border-slate-200 text-center shadow-lg animate-pop-in">
                 <div class="text-5xl mb-4">🔍</div>
                 <h3 class="text-xl font-bold text-slate-800 mb-2">No match found</h3>
-                <p class="text-slate-500 max-w-md mx-auto mb-6">Try relaxing your filter selections!</p>
+                <p class="text-slate-500 max-w-md mx-auto mb-6 text-sm">Try relaxing your filter selections or search terms!</p>
                 <button id="noMatchSurpriseBtn" class="bg-brand-600 hover:bg-brand-700 text-white font-semibold py-2.5 px-6 rounded-xl transition-all cursor-pointer">
                     Surprise Me Instead
                 </button>
@@ -532,6 +691,27 @@ function triggerInteractiveLoading(buttonEl, iconEl, callback) {
     }, 400);
 }
 
+// Search Input Listener
+if (searchInput) {
+    searchInput.addEventListener('input', () => {
+        const value = searchInput.value.trim();
+        if (clearSearchBtn) {
+            if (value.length > 0) {
+                clearSearchBtn.classList.remove('hidden');
+            } else {
+                clearSearchBtn.classList.add('hidden');
+            }
+        }
+    });
+}
+
+if (clearSearchBtn) {
+    clearSearchBtn.addEventListener('click', () => {
+        if (searchInput) searchInput.value = '';
+        clearSearchBtn.classList.add('hidden');
+    });
+}
+
 // Inline Expandable Custom Filters Toggle
 if (toggleInlineFiltersBtn) {
     toggleInlineFiltersBtn.addEventListener('click', () => {
@@ -554,6 +734,12 @@ findMealBtn.addEventListener('click', () => {
     }
     triggerInteractiveLoading(findMealBtn, findMealIcon, () => renderCard(findMeal(false)));
 });
+
+if (searchAllMatchesBtn) {
+    searchAllMatchesBtn.addEventListener('click', () => {
+        triggerInteractiveLoading(searchAllMatchesBtn, searchAllIcon, () => renderSearchResults());
+    });
+}
 
 surpriseBtn.addEventListener('click', () => {
     if (appMode === 'restaurants') {

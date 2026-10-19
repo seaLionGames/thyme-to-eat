@@ -109,6 +109,19 @@
                 <p id="controlsSubtitle" class="text-slate-500 text-xs sm:text-sm mt-1">Select a quick preference or let us pick a random meal!</p>
             </div>
 
+            <!-- Live Text Search Bar (Recipe Mode Only) -->
+            <div id="searchBarGroup" class="recipe-only-filter relative">
+                <label for="searchInput" class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1">Search Keywords</label>
+                <div class="relative">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+                    <input id="searchInput" type="text" placeholder="Search by name, ingredient, or tag (e.g., Chicken, Pasta, Spicy)..."
+                        class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-10 py-2.5 text-sm text-slate-700 font-medium focus:outline-none focus:ring-2 focus:ring-brand-500/20 transition-colors">
+                    <button id="clearSearchBtn" type="button" class="hidden absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs cursor-pointer p-1">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+            </div>
+
             <!-- Primary dropdowns -->
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div id="courseFilterGroup" class="space-y-1 recipe-only-filter">
@@ -220,11 +233,15 @@
 
             <!-- Action Buttons Container -->
             <div class="flex flex-col sm:flex-row items-center gap-3 pt-2">
-                <button id="findMealBtn" class="w-full sm:flex-1 bg-brand-600 hover:bg-brand-700 active:scale-[0.98] text-white font-semibold py-3.5 px-6 rounded-xl shadow-lg shadow-brand-500/30 transition-all cursor-pointer flex items-center justify-center gap-2">
+                <button id="findMealBtn" class="w-full sm:flex-1 bg-brand-600 hover:bg-brand-700 active:scale-[0.98] text-white font-semibold py-3.5 px-5 rounded-xl shadow-lg shadow-brand-500/30 transition-all cursor-pointer flex items-center justify-center gap-2">
                     <i id="findMealIcon" class="fa-solid fa-utensils"></i>
                     <span id="findMealBtnLabel">Find Me a Meal</span>
                 </button>
-                <button id="surpriseBtn" class="w-full sm:w-auto bg-slate-100 hover:bg-slate-200 active:scale-[0.98] text-slate-700 font-semibold py-3.5 px-6 rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer">
+                <button id="searchAllMatchesBtn" class="w-full sm:w-auto bg-slate-800 hover:bg-slate-900 active:scale-[0.98] text-white font-semibold py-3.5 px-5 rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer recipe-only-filter">
+                    <i id="searchAllIcon" class="fa-solid fa-list-ul"></i>
+                    <span>Search All Matches</span>
+                </button>
+                <button id="surpriseBtn" class="w-full sm:w-auto bg-slate-100 hover:bg-slate-200 active:scale-[0.98] text-slate-700 font-semibold py-3.5 px-5 rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer">
                     <i id="surpriseIcon" class="fa-solid fa-dice text-brand-600"></i>
                     <span id="surpriseBtnLabel">Surprise Me!</span>
                 </button>
