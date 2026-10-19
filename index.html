@@ -6,7 +6,7 @@
     <title>ThymeToEat - End Dinner Indecision</title>
     <!-- Tailwind CSS via CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome Icons for UI Polish -->
+    <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script>
         tailwind.config = {
@@ -22,12 +22,27 @@
                         }
                     },
                     animation: {
-                        'pop-in': 'popIn 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards',
+                        'pop-in': 'popIn 400ms cubic-bezier(0.16, 1, 0.3, 1) forwards',
+                        'spin-full': 'spin360 400ms ease-in-out forwards',
+                        'toast-in': 'toastIn 300ms cubic-bezier(0.16, 1, 0.3, 1) forwards',
+                        'toast-out': 'toastOut 300ms ease-in forwards',
                     },
                     keyframes: {
                         popIn: {
-                            '0%': { opacity: '0', transform: 'scale(0.9) translateY(10px)' },
-                            '100%': { opacity: '1', transform: 'scale(1) translateY(0)' }
+                            '0%': { opacity: '0', transform: 'translateY(8px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' }
+                        },
+                        spin360: {
+                            '0%': { transform: 'rotate(0deg)' },
+                            '100%': { transform: 'rotate(360deg)' }
+                        },
+                        toastIn: {
+                            '0%': { opacity: '0', transform: 'translateX(20px) scale(0.95)' },
+                            '100%': { opacity: '1', transform: 'translateX(0) scale(1)' }
+                        },
+                        toastOut: {
+                            '0%': { opacity: '1', transform: 'translateX(0) scale(1)' },
+                            '100%': { opacity: '0', transform: 'translateX(20px) scale(0.95)' }
                         }
                     }
                 }
@@ -37,141 +52,217 @@
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col font-sans antialiased">
 
-    <!-- Header -->
-    <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
-        <div class="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
+    <!-- Floating Toast Notification System Container (Top-Right) -->
+    <div id="toastContainer" class="fixed top-5 right-5 z-[60] pointer-events-none flex flex-col gap-2.5 items-end max-w-sm w-full px-4"></div>
+
+    <!-- Sticky Centered Top Header -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm w-full">
+        <div class="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
             <div class="flex items-center space-x-3">
-                <div class="bg-brand-500 text-white p-2.5 rounded-2xl shadow-md shadow-brand-500/20">
-                    <i class="fa-solid fa-utensils text-xl"></i>
+                <div class="bg-brand-500 text-white p-2 rounded-xl shadow-md shadow-brand-500/20 transition-transform hover:scale-105 duration-200">
+                    <i class="fa-solid fa-utensils text-lg"></i>
                 </div>
-                <div>
-                    <h1 class="text-xl font-bold bg-gradient-to-r from-brand-600 to-emerald-700 bg-clip-text text-transparent leading-tight">ThymeToEat</h1>
-                    <p class="text-xs text-slate-500 font-medium">No more dinner indecision</p>
-                </div>
+                <h1 class="text-lg font-bold bg-gradient-to-r from-brand-600 to-emerald-700 bg-clip-text text-transparent">ThymeToEat</h1>
             </div>
-            <span class="text-xs font-semibold px-3 py-1 bg-brand-50 text-brand-700 rounded-full border border-brand-100 hidden sm:inline-block">
-                <i class="fa-solid fa-bolt mr-1"></i> Quick Decider
-            </span>
+            
+            <!-- Quick Action Badges (Starred, Log, Dislikes) -->
+            <div class="flex items-center gap-2">
+                <button id="viewFavoritesBtn" class="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 bg-amber-50 text-amber-700 rounded-lg border border-amber-200 hover:bg-amber-100 active:scale-95 transition-all cursor-pointer">
+                    <i class="fa-solid fa-star text-amber-500"></i>
+                    <span>Starred (<span id="starredCount">0</span>)</span>
+                </button>
+                <button id="viewDislikesBtn" class="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 bg-rose-50 text-rose-700 rounded-lg border border-rose-200 hover:bg-rose-100 active:scale-95 transition-all cursor-pointer">
+                    <i class="fa-solid fa-thumbs-down text-rose-500"></i>
+                    <span>Dislikes (<span id="dislikedCount">0</span>)</span>
+                </button>
+                <button id="viewHistoryBtn" class="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 bg-slate-100 text-slate-700 rounded-lg border border-slate-200 hover:bg-slate-200 active:scale-95 transition-all cursor-pointer">
+                    <i class="fa-solid fa-clock-rotate-left text-slate-500"></i>
+                    <span>Log (<span id="historyCount">0</span>)</span>
+                </button>
+            </div>
         </div>
     </header>
 
-    <!-- Main Content Container -->
-    <main class="flex-grow max-w-5xl w-full mx-auto px-4 py-8 space-y-8">
+    <!-- Strictly Centered Main Layout Container -->
+    <main class="flex-grow min-h-screen flex flex-col items-center justify-start py-8 px-4 max-w-4xl mx-auto w-full space-y-6">
 
-        <!-- Controls Section -->
-        <section class="bg-white rounded-3xl p-6 sm:p-8 shadow-xl shadow-slate-200/50 border border-slate-100">
-            <div class="mb-6">
-                <h2 class="text-lg font-bold text-slate-900 flex items-center gap-2">
-                    <i class="fa-solid fa-sliders text-brand-500"></i> What are you craving?
-                </h2>
-                <p class="text-sm text-slate-500 mt-1">Set your preferences or leave any as "Any" for wildcards.</p>
-            </div>
-
-            <!-- Filters Grid -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
-                <!-- Cuisine Filter -->
-                <div class="space-y-1.5">
-                    <label for="cuisineSelect" class="block text-xs font-bold uppercase tracking-wider text-slate-500">Cuisine</label>
-                    <div class="relative">
-                        <select id="cuisineSelect" class="w-full appearance-none bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 pr-10 text-slate-700 font-medium focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all cursor-pointer">
-                            <option value="Any">Any Cuisine</option>
-                            <option value="Asian">Asian</option>
-                            <option value="Western">Western</option>
-                            <option value="Mediterranean">Mediterranean</option>
-                            <option value="Mexican">Mexican</option>
-                        </select>
-                        <i class="fa-solid fa-chevron-down absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-xs"></i>
-                    </div>
-                </div>
-
-                <!-- Protein Filter -->
-                <div class="space-y-1.5">
-                    <label for="proteinSelect" class="block text-xs font-bold uppercase tracking-wider text-slate-500">Protein</label>
-                    <div class="relative">
-                        <select id="proteinSelect" class="w-full appearance-none bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 pr-10 text-slate-700 font-medium focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all cursor-pointer">
-                            <option value="Any">Any Protein</option>
-                            <option value="Chicken">Chicken</option>
-                            <option value="Beef">Beef</option>
-                            <option value="Pork">Pork</option>
-                            <option value="Fish/Seafood">Fish / Seafood</option>
-                            <option value="Vegetarian/Tofu">Vegetarian / Tofu</option>
-                        </select>
-                        <i class="fa-solid fa-chevron-down absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-xs"></i>
-                    </div>
-                </div>
-
-                <!-- Base Style Filter -->
-                <div class="space-y-1.5">
-                    <label for="styleSelect" class="block text-xs font-bold uppercase tracking-wider text-slate-500">Base Style</label>
-                    <div class="relative">
-                        <select id="styleSelect" class="w-full appearance-none bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 pr-10 text-slate-700 font-medium focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all cursor-pointer">
-                            <option value="Any">Any Style</option>
-                            <option value="Noodles">Noodles</option>
-                            <option value="Rice">Rice</option>
-                            <option value="Pasta">Pasta</option>
-                            <option value="Soup">Soup</option>
-                            <option value="Sandwich/Wrap">Sandwich / Wrap</option>
-                        </select>
-                        <i class="fa-solid fa-chevron-down absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-xs"></i>
-                    </div>
-                </div>
-
-                <!-- Difficulty Filter -->
-                <div class="space-y-1.5">
-                    <label for="difficultySelect" class="block text-xs font-bold uppercase tracking-wider text-slate-500">Difficulty</label>
-                    <div class="relative">
-                        <select id="difficultySelect" class="w-full appearance-none bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 pr-10 text-slate-700 font-medium focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all cursor-pointer">
-                            <option value="Any">Any Difficulty</option>
-                            <option value="Easy">Easy</option>
-                            <option value="Medium">Medium</option>
-                            <option value="Hard">Hard</option>
-                        </select>
-                        <i class="fa-solid fa-chevron-down absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-xs"></i>
-                    </div>
-                </div>
-
-                <!-- Mood / Vibe Filter -->
-                <div class="space-y-1.5 sm:col-span-2 lg:col-span-2">
-                    <label for="moodSelect" class="block text-xs font-bold uppercase tracking-wider text-slate-500">Mood / Vibe</label>
-                    <div class="relative">
-                        <select id="moodSelect" class="w-full appearance-none bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 pr-10 text-slate-700 font-medium focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all cursor-pointer">
-                            <option value="Any">Any Mood</option>
-                            <option value="Quick & Lazy">Quick & Lazy</option>
-                            <option value="Healthy & Clean">Healthy & Clean</option>
-                            <option value="Comforting">Comforting</option>
-                            <option value="Guilty Pleasure">Guilty Pleasure</option>
-                            <option value="Spicy Kick">Spicy Kick</option>
-                            <option value="Fresh & Light">Fresh & Light</option>
-                            <option value="Date Night / Fancy">Date Night / Fancy</option>
-                            <option value="Feast / Hungry">Feast / Hungry</option>
-                        </select>
-                        <i class="fa-solid fa-chevron-down absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-xs"></i>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Action Buttons -->
-            <div class="flex flex-col sm:flex-row items-center gap-3">
-                <button id="findMealBtn" class="w-full sm:flex-1 bg-brand-600 hover:bg-brand-700 active:scale-[0.98] text-white font-semibold py-3.5 px-6 rounded-xl shadow-lg shadow-brand-500/30 transition-all duration-150 flex items-center justify-center gap-2 group cursor-pointer">
-                    <i class="fa-solid fa-utensils group-hover:rotate-12 transition-transform"></i>
-                    <span>Find Me a Meal</span>
+        <!-- Mode Toggle: Cook at Home vs Nearby Restaurants -->
+        <section class="bg-white rounded-3xl p-2 shadow-xl shadow-slate-200/50 border border-slate-100 w-full">
+            <div class="grid grid-cols-2 gap-2" role="tablist" aria-label="Meal source">
+                <button id="modeRecipesBtn" type="button" aria-selected="true"
+                    class="mode-btn flex items-center justify-center gap-2 py-3 px-4 rounded-2xl font-semibold text-sm transition-all cursor-pointer bg-brand-600 text-white shadow-md shadow-brand-500/20">
+                    <i class="fa-solid fa-kitchen-set"></i>
+                    <span>Cook at Home</span>
                 </button>
-                <button id="surpriseBtn" class="w-full sm:w-auto bg-slate-100 hover:bg-slate-200 active:scale-[0.98] text-slate-700 font-semibold py-3.5 px-6 rounded-xl transition-all duration-150 flex items-center justify-center gap-2 cursor-pointer">
-                    <i class="fa-solid fa-dice text-brand-600"></i>
-                    <span>Surprise Me!</span>
+                <button id="modeRestaurantsBtn" type="button" aria-selected="false"
+                    class="mode-btn flex items-center justify-center gap-2 py-3 px-4 rounded-2xl font-semibold text-sm transition-all cursor-pointer bg-transparent text-slate-600 hover:bg-slate-50">
+                    <i class="fa-solid fa-location-dot"></i>
+                    <span>Nearby Restaurants</span>
                 </button>
             </div>
         </section>
 
-        <!-- Result Section Container -->
-        <section id="resultContainer" class="relative">
-            <!-- Dynamic Recipe Content -->
+        <!-- Primary Control Box (Inline Expandable) -->
+        <section class="bg-white rounded-3xl p-6 sm:p-8 shadow-xl shadow-slate-200/50 border border-slate-100 w-full space-y-6">
+            <div class="text-center">
+                <h2 class="text-2xl font-extrabold text-slate-900 tracking-tight">What should we eat today?</h2>
+                <p id="controlsSubtitle" class="text-slate-500 text-xs sm:text-sm mt-1">Select a quick preference or let us pick a random meal!</p>
+            </div>
+
+            <!-- Primary dropdowns -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div id="courseFilterGroup" class="space-y-1 recipe-only-filter">
+                    <label for="courseSelect" class="block text-[11px] font-bold uppercase tracking-wider text-slate-400">Course</label>
+                    <select id="courseSelect" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-700 font-medium focus:outline-none focus:ring-2 focus:ring-brand-500/20 cursor-pointer transition-colors">
+                        <option value="Any">Any Course</option>
+                        <option value="Main Course">Main Course</option>
+                        <option value="Dessert">Dessert</option>
+                        <option value="Starter / Appetizer">Starter / Appetizer</option>
+                        <option value="Snack">Snack</option>
+                    </select>
+                </div>
+
+                <div class="space-y-1">
+                    <label for="cuisineSelect" class="block text-[11px] font-bold uppercase tracking-wider text-slate-400">Cuisine</label>
+                    <select id="cuisineSelect" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-700 font-medium focus:outline-none focus:ring-2 focus:ring-brand-500/20 cursor-pointer transition-colors">
+                        <option value="Any">Any Cuisine</option>
+                        <option value="Asian">Asian</option>
+                        <option value="Western">Western</option>
+                        <option value="Mediterranean">Mediterranean</option>
+                        <option value="Mexican">Mexican</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Restaurant-only filters -->
+            <div id="restaurantFiltersRow" class="restaurant-only-filter hidden grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="space-y-1">
+                    <label for="placeTypeSelect" class="block text-[11px] font-bold uppercase tracking-wider text-slate-400">Place Type</label>
+                    <select id="placeTypeSelect" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-700 font-medium focus:outline-none focus:ring-2 focus:ring-brand-500/20 cursor-pointer transition-colors">
+                        <option value="Any">Any Type</option>
+                        <option value="restaurant">Restaurant</option>
+                        <option value="fast_food">Fast Food</option>
+                        <option value="cafe">Cafe</option>
+                        <option value="food_court">Food Court</option>
+                    </select>
+                </div>
+                <div class="space-y-1">
+                    <label for="radiusSelect" class="block text-[11px] font-bold uppercase tracking-wider text-slate-400">Search Radius</label>
+                    <select id="radiusSelect" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-700 font-medium focus:outline-none focus:ring-2 focus:ring-brand-500/20 cursor-pointer transition-colors">
+                        <option value="500">Within 0.5 km</option>
+                        <option value="1000" selected>Within 1 km</option>
+                        <option value="2000">Within 2 km</option>
+                        <option value="5000">Within 5 km</option>
+                    </select>
+                </div>
+            </div>
+
+            <div id="locationStatus" class="restaurant-only-filter hidden text-xs text-slate-500 flex items-start gap-2 bg-slate-50 border border-slate-100 rounded-xl px-4 py-3">
+                <i class="fa-solid fa-satellite-dish mt-0.5 text-brand-500"></i>
+                <span id="locationStatusText">Location is prepared in the background. Places come from OpenStreetMap via free Overpass mirrors (no API key).</span>
+            </div>
+
+            <!-- Inline Expandable Controls (Protein, Style, Difficulty, Mood) -->
+            <div id="expandedFiltersPanel" class="hidden pt-4 border-t border-slate-100 grid grid-cols-1 sm:grid-cols-2 gap-4 animate-pop-in recipe-only-filter">
+                <div class="space-y-1">
+                    <label for="proteinSelect" class="block text-[11px] font-bold uppercase tracking-wider text-slate-400">Protein</label>
+                    <select id="proteinSelect" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-700 font-medium focus:outline-none focus:ring-2 focus:ring-brand-500/20 cursor-pointer transition-colors">
+                        <option value="Any">Any Protein</option>
+                        <option value="Chicken">Chicken</option>
+                        <option value="Beef">Beef</option>
+                        <option value="Pork">Pork</option>
+                        <option value="Fish/Seafood">Fish / Seafood</option>
+                        <option value="Vegetarian/Tofu">Vegetarian / Tofu</option>
+                    </select>
+                </div>
+
+                <div class="space-y-1">
+                    <label for="styleSelect" class="block text-[11px] font-bold uppercase tracking-wider text-slate-400">Base Style</label>
+                    <select id="styleSelect" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-700 font-medium focus:outline-none focus:ring-2 focus:ring-brand-500/20 cursor-pointer transition-colors">
+                        <option value="Any">Any Style</option>
+                        <option value="Rice">Rice</option>
+                        <option value="Noodles">Noodles</option>
+                        <option value="Pasta">Pasta</option>
+                        <option value="Small Bites / Dim Sum">Small Bites / Dim Sum</option>
+                        <option value="Roast / Barbecue Meat">Roast / Barbecue Meat</option>
+                        <option value="Seafood Special">Seafood Special</option>
+                        <option value="Baked / Cake">Baked / Cake</option>
+                        <option value="Beverage / Dessert">Beverage / Dessert</option>
+                        <option value="Sandwich/Wrap">Sandwich / Wrap</option>
+                    </select>
+                </div>
+
+                <div class="space-y-1">
+                    <label for="difficultySelect" class="block text-[11px] font-bold uppercase tracking-wider text-slate-400">Difficulty</label>
+                    <select id="difficultySelect" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-700 font-medium focus:outline-none focus:ring-2 focus:ring-brand-500/20 cursor-pointer transition-colors">
+                        <option value="Any">Any Difficulty</option>
+                        <option value="Easy">Easy</option>
+                        <option value="Medium">Medium</option>
+                        <option value="Hard">Hard</option>
+                    </select>
+                </div>
+
+                <div class="space-y-1">
+                    <label for="moodSelect" class="block text-[11px] font-bold uppercase tracking-wider text-slate-400">Mood / Vibe</label>
+                    <select id="moodSelect" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-700 font-medium focus:outline-none focus:ring-2 focus:ring-brand-500/20 cursor-pointer transition-colors">
+                        <option value="Any">Any Mood</option>
+                        <option value="Quick & Lazy">Quick & Lazy</option>
+                        <option value="Healthy & Clean">Healthy & Clean</option>
+                        <option value="Comforting">Comforting</option>
+                        <option value="Guilty Pleasure">Guilty Pleasure</option>
+                        <option value="Spicy Kick">Spicy Kick</option>
+                        <option value="Fresh & Light">Fresh & Light</option>
+                        <option value="Date Night / Fancy">Date Night / Fancy</option>
+                        <option value="Feast / Hungry">Feast / Hungry</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Action Buttons Container -->
+            <div class="flex flex-col sm:flex-row items-center gap-3 pt-2">
+                <button id="findMealBtn" class="w-full sm:flex-1 bg-brand-600 hover:bg-brand-700 active:scale-[0.98] text-white font-semibold py-3.5 px-6 rounded-xl shadow-lg shadow-brand-500/30 transition-all cursor-pointer flex items-center justify-center gap-2">
+                    <i id="findMealIcon" class="fa-solid fa-utensils"></i>
+                    <span id="findMealBtnLabel">Find Me a Meal</span>
+                </button>
+                <button id="surpriseBtn" class="w-full sm:w-auto bg-slate-100 hover:bg-slate-200 active:scale-[0.98] text-slate-700 font-semibold py-3.5 px-6 rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer">
+                    <i id="surpriseIcon" class="fa-solid fa-dice text-brand-600"></i>
+                    <span id="surpriseBtnLabel">Surprise Me!</span>
+                </button>
+            </div>
+
+            <!-- Custom Filter Toggle Button -->
+            <div id="customizeMoreWrap" class="text-center pt-1 recipe-only-filter">
+                <button id="toggleInlineFiltersBtn" class="text-xs font-bold text-slate-400 hover:text-brand-600 transition-colors cursor-pointer flex items-center justify-center gap-1.5 mx-auto">
+                    <i class="fa-solid fa-sliders"></i>
+                    <span>Customize More (Protein, Style, Mood)</span>
+                    <i id="chevronIcon" class="fa-solid fa-chevron-down text-[10px] transition-transform duration-200"></i>
+                </button>
+            </div>
+        </section>
+
+        <!-- Recipe Result Display Box -->
+        <section id="resultContainer" class="w-full relative">
+            <!-- Rendered dynamically -->
         </section>
     </main>
 
+    <!-- Side Drawer Modal for Log, Starred, and Disliked Lists -->
+    <div id="drawerOverlay" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-40 hidden transition-opacity"></div>
+    <aside id="drawer" class="fixed top-0 right-0 h-full w-full max-w-md bg-white z-50 shadow-2xl flex flex-col translate-x-full transition-transform duration-300 ease-in-out">
+        <div class="p-6 border-b border-slate-100 flex items-center justify-between">
+            <h3 id="drawerTitle" class="text-lg font-bold text-slate-900">Modal View</h3>
+            <button id="closeDrawerBtn" class="w-8 h-8 rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 active:scale-90 flex items-center justify-center cursor-pointer transition-all">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+        <div id="drawerContent" class="flex-grow p-6 overflow-y-auto space-y-3"></div>
+        <div id="drawerFooter" class="p-4 border-t border-slate-100 bg-slate-50"></div>
+    </aside>
+
     <!-- Footer -->
-    <footer class="bg-white border-t border-slate-200 py-6 text-center text-xs text-slate-400 mt-auto">
+    <footer class="bg-white border-t border-slate-200 py-6 text-center text-xs text-slate-400 mt-auto w-full">
         <p>© ThymeToEat. Powered by Vanilla JS & Tailwind CSS.</p>
+        <p class="mt-1">Nearby places from <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer" class="underline hover:text-slate-600">OpenStreetMap</a> contributors via free Overpass mirrors.</p>
     </footer>
 
     <!-- App Logic Script -->
