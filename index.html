@@ -58,18 +58,34 @@
     <!-- Main Content Container -->
     <main class="flex-grow max-w-5xl w-full mx-auto px-4 py-8 space-y-8">
 
+        <!-- Mode Toggle: Cook at Home vs Eat Out Nearby -->
+        <section class="bg-white rounded-3xl p-2 shadow-xl shadow-slate-200/50 border border-slate-100">
+            <div class="grid grid-cols-2 gap-2" role="tablist" aria-label="Meal source">
+                <button id="modeRecipesBtn" type="button" aria-selected="true"
+                    class="mode-btn flex items-center justify-center gap-2 py-3 px-4 rounded-2xl font-semibold text-sm transition-all cursor-pointer bg-brand-600 text-white shadow-md shadow-brand-500/20">
+                    <i class="fa-solid fa-kitchen-set"></i>
+                    <span>Cook at Home</span>
+                </button>
+                <button id="modeRestaurantsBtn" type="button" aria-selected="false"
+                    class="mode-btn flex items-center justify-center gap-2 py-3 px-4 rounded-2xl font-semibold text-sm transition-all cursor-pointer bg-transparent text-slate-600 hover:bg-slate-50">
+                    <i class="fa-solid fa-location-dot"></i>
+                    <span>Nearby Restaurants</span>
+                </button>
+            </div>
+        </section>
+
         <!-- Controls Section -->
         <section class="bg-white rounded-3xl p-6 sm:p-8 shadow-xl shadow-slate-200/50 border border-slate-100">
             <div class="mb-6">
                 <h2 class="text-lg font-bold text-slate-900 flex items-center gap-2">
                     <i class="fa-solid fa-sliders text-brand-500"></i> What are you craving?
                 </h2>
-                <p class="text-sm text-slate-500 mt-1">Set your preferences or leave any as "Any" for wildcards.</p>
+                <p id="controlsSubtitle" class="text-sm text-slate-500 mt-1">Set your preferences or leave any as "Any" for wildcards.</p>
             </div>
 
             <!-- Filters Grid -->
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
-                <!-- Cuisine Filter -->
+                <!-- Cuisine Filter (shared) -->
                 <div class="space-y-1.5">
                     <label for="cuisineSelect" class="block text-xs font-bold uppercase tracking-wider text-slate-500">Cuisine</label>
                     <div class="relative">
@@ -84,8 +100,8 @@
                     </div>
                 </div>
 
-                <!-- Protein Filter -->
-                <div class="space-y-1.5">
+                <!-- Protein Filter (recipes only) -->
+                <div id="proteinFilterGroup" class="space-y-1.5 recipe-only-filter">
                     <label for="proteinSelect" class="block text-xs font-bold uppercase tracking-wider text-slate-500">Protein</label>
                     <div class="relative">
                         <select id="proteinSelect" class="w-full appearance-none bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 pr-10 text-slate-700 font-medium focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all cursor-pointer">
@@ -100,8 +116,8 @@
                     </div>
                 </div>
 
-                <!-- Base Style Filter -->
-                <div class="space-y-1.5">
+                <!-- Base Style Filter (recipes only) -->
+                <div id="styleFilterGroup" class="space-y-1.5 recipe-only-filter">
                     <label for="styleSelect" class="block text-xs font-bold uppercase tracking-wider text-slate-500">Base Style</label>
                     <div class="relative">
                         <select id="styleSelect" class="w-full appearance-none bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 pr-10 text-slate-700 font-medium focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all cursor-pointer">
@@ -116,8 +132,8 @@
                     </div>
                 </div>
 
-                <!-- Difficulty Filter -->
-                <div class="space-y-1.5">
+                <!-- Difficulty Filter (recipes only) -->
+                <div id="difficultyFilterGroup" class="space-y-1.5 recipe-only-filter">
                     <label for="difficultySelect" class="block text-xs font-bold uppercase tracking-wider text-slate-500">Difficulty</label>
                     <div class="relative">
                         <select id="difficultySelect" class="w-full appearance-none bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 pr-10 text-slate-700 font-medium focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all cursor-pointer">
@@ -130,8 +146,8 @@
                     </div>
                 </div>
 
-                <!-- Mood / Vibe Filter -->
-                <div class="space-y-1.5 sm:col-span-2 lg:col-span-2">
+                <!-- Mood / Vibe Filter (recipes only) -->
+                <div id="moodFilterGroup" class="space-y-1.5 sm:col-span-2 lg:col-span-2 recipe-only-filter">
                     <label for="moodSelect" class="block text-xs font-bold uppercase tracking-wider text-slate-500">Mood / Vibe</label>
                     <div class="relative">
                         <select id="moodSelect" class="w-full appearance-none bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 pr-10 text-slate-700 font-medium focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all cursor-pointer">
@@ -148,17 +164,51 @@
                         <i class="fa-solid fa-chevron-down absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-xs"></i>
                     </div>
                 </div>
+
+                <!-- Restaurant-only filters -->
+                <div id="placeTypeFilterGroup" class="space-y-1.5 restaurant-only-filter hidden">
+                    <label for="placeTypeSelect" class="block text-xs font-bold uppercase tracking-wider text-slate-500">Place Type</label>
+                    <div class="relative">
+                        <select id="placeTypeSelect" class="w-full appearance-none bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 pr-10 text-slate-700 font-medium focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all cursor-pointer">
+                            <option value="Any">Any Type</option>
+                            <option value="restaurant">Restaurant</option>
+                            <option value="fast_food">Fast Food</option>
+                            <option value="cafe">Cafe</option>
+                            <option value="food_court">Food Court</option>
+                        </select>
+                        <i class="fa-solid fa-chevron-down absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-xs"></i>
+                    </div>
+                </div>
+
+                <div id="radiusFilterGroup" class="space-y-1.5 restaurant-only-filter hidden">
+                    <label for="radiusSelect" class="block text-xs font-bold uppercase tracking-wider text-slate-500">Search Radius</label>
+                    <div class="relative">
+                        <select id="radiusSelect" class="w-full appearance-none bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 pr-10 text-slate-700 font-medium focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all cursor-pointer">
+                            <option value="500">Within 0.5 km</option>
+                            <option value="1000">Within 1 km</option>
+                            <option value="2000" selected>Within 2 km</option>
+                            <option value="5000">Within 5 km</option>
+                        </select>
+                        <i class="fa-solid fa-chevron-down absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-xs"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Location status (restaurants mode) -->
+            <div id="locationStatus" class="restaurant-only-filter hidden mb-6 text-xs text-slate-500 flex items-start gap-2 bg-slate-50 border border-slate-100 rounded-xl px-4 py-3">
+                <i class="fa-solid fa-satellite-dish mt-0.5 text-brand-500"></i>
+                <span id="locationStatusText">Location will be requested when you search. Data from OpenStreetMap via the free Overpass API (no key required).</span>
             </div>
 
             <!-- Action Buttons -->
             <div class="flex flex-col sm:flex-row items-center gap-3">
                 <button id="findMealBtn" class="w-full sm:flex-1 bg-brand-600 hover:bg-brand-700 active:scale-[0.98] text-white font-semibold py-3.5 px-6 rounded-xl shadow-lg shadow-brand-500/30 transition-all duration-150 flex items-center justify-center gap-2 group cursor-pointer">
                     <i class="fa-solid fa-utensils group-hover:rotate-12 transition-transform"></i>
-                    <span>Find Me a Meal</span>
+                    <span id="findMealBtnLabel">Find Me a Meal</span>
                 </button>
                 <button id="surpriseBtn" class="w-full sm:w-auto bg-slate-100 hover:bg-slate-200 active:scale-[0.98] text-slate-700 font-semibold py-3.5 px-6 rounded-xl transition-all duration-150 flex items-center justify-center gap-2 cursor-pointer">
                     <i class="fa-solid fa-dice text-brand-600"></i>
-                    <span>Surprise Me!</span>
+                    <span id="surpriseBtnLabel">Surprise Me!</span>
                 </button>
             </div>
         </section>
@@ -172,6 +222,7 @@
     <!-- Footer -->
     <footer class="bg-white border-t border-slate-200 py-6 text-center text-xs text-slate-400 mt-auto">
         <p>© ThymeToEat. Powered by Vanilla JS & Tailwind CSS.</p>
+        <p class="mt-1">Nearby places from <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer" class="underline hover:text-slate-600">OpenStreetMap</a> contributors via the free Overpass API.</p>
     </footer>
 
     <!-- App Logic Script -->
