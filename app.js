@@ -1,5 +1,8 @@
 /**
  * ThymeToEat - Application Logic & Point-Based Weighted Randomization Engine
+ *
+ * Nearby restaurants: free OpenStreetMap Overpass mirrors (CORS, no API key)
+ * Location: browser geolocation raced with GeoJS IP fallback
  */
 
 let recipes = [];
@@ -17,6 +20,31 @@ let favorites = JSON.parse(localStorage.getItem(FAVORITES_KEY)) || [];
 let cookingHistory = JSON.parse(localStorage.getItem(HISTORY_KEY)) || [];
 let dislikedRecipes = JSON.parse(localStorage.getItem(DISLIKED_KEY)) || [];
 
+/** @type {'recipes' | 'restaurants'} */
+let appMode = 'recipes';
+let userLocation = null;
+let locationPromise = null;
+let lastRestaurants = [];
+const restaurantCache = new Map();
+const RESTAURANT_CACHE_TTL_MS = 5 * 60 * 1000;
+
+const OVERPASS_ENDPOINTS = [
+    'https://overpass-api.de/api/interpreter',
+    'https://lz4.overpass-api.de/api/interpreter',
+    'https://overpass.kumi.systems/api/interpreter'
+];
+const GEOJS_URL = 'https://get.geojs.io/v1/ip/geo.json';
+const GEO_TIMEOUT_MS = 3500;
+const OVERPASS_TIMEOUT_MS = 8000;
+const IP_TIMEOUT_MS = 2500;
+
+const CUISINE_KEYWORD_MAP = {
+    Asian: ['asian', 'chinese', 'japanese', 'korean', 'thai', 'vietnamese', 'indian', 'sushi', 'ramen', 'noodle', 'malaysian', 'indonesian', 'filipino', 'taiwanese'],
+    Western: ['american', 'burger', 'steak', 'bbq', 'barbecue', 'british', 'french', 'german', 'italian', 'pizza', 'european', 'diner', 'western'],
+    Mediterranean: ['mediterranean', 'greek', 'turkish', 'lebanese', 'middle_eastern', 'falafel', 'kebab', 'spanish', 'portuguese', 'moroccan'],
+    Mexican: ['mexican', 'tex-mex', 'taco', 'burrito', 'latin', 'latin_american']
+};
+
 // DOM Controls
 const courseSelect = document.getElementById('courseSelect');
 const cuisineSelect = document.getElementById('cuisineSelect');
@@ -29,7 +57,15 @@ const findMealBtn = document.getElementById('findMealBtn');
 const surpriseBtn = document.getElementById('surpriseBtn');
 const findMealIcon = document.getElementById('findMealIcon');
 const surpriseIcon = document.getElementById('surpriseIcon');
+const findMealBtnLabel = document.getElementById('findMealBtnLabel');
+const surpriseBtnLabel = document.getElementById('surpriseBtnLabel');
 const resultContainer = document.getElementById('resultContainer');
+const modeRecipesBtn = document.getElementById('modeRecipesBtn');
+const modeRestaurantsBtn = document.getElementById('modeRestaurantsBtn');
+const controlsSubtitle = document.getElementById('controlsSubtitle');
+const placeTypeSelect = document.getElementById('placeTypeSelect');
+const radiusSelect = document.getElementById('radiusSelect');
+const locationStatusText = document.getElementById('locationStatusText');
 
 // Inline Customization Controls
 const toggleInlineFiltersBtn = document.getElementById('toggleInlineFiltersBtn');
@@ -163,7 +199,7 @@ async function loadRecipes() {
         recipes = await response.json();
         updateBadges();
 
-        if (recipes.length > 0) {
+        if (appMode === 'recipes' && recipes.length > 0) {
             renderCard({ recipe: weightedRandomChoice(recipes), isFallback: false, matchedTraits: [] });
         }
     } catch (error) {
@@ -512,12 +548,23 @@ if (toggleInlineFiltersBtn) {
 
 // Main Action Buttons
 findMealBtn.addEventListener('click', () => {
+    if (appMode === 'restaurants') {
+        searchNearbyRestaurants({ surprise: false });
+        return;
+    }
     triggerInteractiveLoading(findMealBtn, findMealIcon, () => renderCard(findMeal(false)));
 });
 
 surpriseBtn.addEventListener('click', () => {
+    if (appMode === 'restaurants') {
+        searchNearbyRestaurants({ surprise: true });
+        return;
+    }
     triggerInteractiveLoading(surpriseBtn, surpriseIcon, () => renderCard(findMeal(true)));
 });
+
+if (modeRecipesBtn) modeRecipesBtn.addEventListener('click', () => setMode('recipes'));
+if (modeRestaurantsBtn) modeRestaurantsBtn.addEventListener('click', () => setMode('restaurants'));
 
 // Helper User Actions
 function toggleFavorite(recipe) {
@@ -755,5 +802,558 @@ window.selectRecipeFromDrawer = function(recipeId) {
 if (closeDrawerBtn) closeDrawerBtn.addEventListener('click', closeDrawer);
 if (drawerOverlay) drawerOverlay.addEventListener('click', closeDrawer);
 
+// ── Nearby restaurants (fast path) ──────────────────────────────────────────
+
+function escapeHtml(value) {
+    return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
+function safeHttpUrl(value) {
+    if (!value) return '';
+    const trimmed = String(value).trim();
+    try {
+        const withProtocol = /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
+        const url = new URL(withProtocol);
+        if (url.protocol !== 'http:' && url.protocol !== 'https:') return '';
+        return url.href;
+    } catch {
+        return '';
+    }
+}
+
+function setLocationStatus(message, isError = false) {
+    if (!locationStatusText) return;
+    locationStatusText.textContent = message;
+    const parent = locationStatusText.parentElement;
+    if (!parent) return;
+    parent.classList.toggle('border-red-200', isError);
+    parent.classList.toggle('bg-red-50', isError);
+    parent.classList.toggle('text-red-700', isError);
+}
+
+function setRestaurantLoading(isLoading, label = 'Searching…', detail = 'Talking to OpenStreetMap mirrors…') {
+    findMealBtn.disabled = isLoading;
+    surpriseBtn.disabled = isLoading;
+    findMealBtn.classList.toggle('opacity-70', isLoading);
+    surpriseBtn.classList.toggle('opacity-70', isLoading);
+    if (isLoading) {
+        resultContainer.innerHTML = `
+            <div class="bg-white rounded-3xl p-8 border border-slate-200 text-center shadow-lg animate-pop-in w-full">
+                <div class="text-4xl mb-3"><i class="fa-solid fa-spinner fa-spin text-brand-500"></i></div>
+                <h3 class="text-lg font-bold text-slate-800 mb-1">${escapeHtml(label)}</h3>
+                <p id="restaurantLoadingDetail" class="text-sm text-slate-500">${escapeHtml(detail)}</p>
+            </div>
+        `;
+    }
+}
+
+function updateRestaurantLoadingDetail(detail) {
+    const el = document.getElementById('restaurantLoadingDetail');
+    if (el) el.textContent = detail;
+}
+
+function setMode(mode) {
+    appMode = mode;
+    const isRecipes = mode === 'recipes';
+
+    document.querySelectorAll('.recipe-only-filter').forEach((el) => {
+        el.classList.toggle('hidden', !isRecipes);
+    });
+    document.querySelectorAll('.restaurant-only-filter').forEach((el) => {
+        el.classList.toggle('hidden', isRecipes);
+    });
+
+    if (!isRecipes && expandedFiltersPanel && !expandedFiltersPanel.classList.contains('hidden')) {
+        expandedFiltersPanel.classList.add('hidden');
+        if (chevronIcon) chevronIcon.classList.remove('rotate-180');
+    }
+
+    const activeClasses = 'mode-btn flex items-center justify-center gap-2 py-3 px-4 rounded-2xl font-semibold text-sm transition-all cursor-pointer bg-brand-600 text-white shadow-md shadow-brand-500/20';
+    const idleClasses = 'mode-btn flex items-center justify-center gap-2 py-3 px-4 rounded-2xl font-semibold text-sm transition-all cursor-pointer bg-transparent text-slate-600 hover:bg-slate-50';
+
+    if (modeRecipesBtn) {
+        modeRecipesBtn.className = isRecipes ? activeClasses : idleClasses;
+        modeRecipesBtn.setAttribute('aria-selected', String(isRecipes));
+    }
+    if (modeRestaurantsBtn) {
+        modeRestaurantsBtn.className = isRecipes ? idleClasses : activeClasses;
+        modeRestaurantsBtn.setAttribute('aria-selected', String(!isRecipes));
+    }
+
+    if (isRecipes) {
+        if (controlsSubtitle) controlsSubtitle.textContent = 'Select a quick preference or let us pick a random meal!';
+        if (findMealBtnLabel) findMealBtnLabel.textContent = 'Find Me a Meal';
+        if (surpriseBtnLabel) surpriseBtnLabel.textContent = 'Surprise Me!';
+        if (findMealIcon) findMealIcon.className = 'fa-solid fa-utensils';
+        if (recipes.length > 0) {
+            renderCard({ recipe: weightedRandomChoice(recipes), isFallback: false, matchedTraits: [] });
+        }
+    } else {
+        if (controlsSubtitle) controlsSubtitle.textContent = 'Find nearby places fast via free OpenStreetMap Overpass mirrors — no API key.';
+        if (findMealBtnLabel) findMealBtnLabel.textContent = 'Find Nearby Places';
+        if (surpriseBtnLabel) surpriseBtnLabel.textContent = 'Surprise Pick';
+        if (findMealIcon) findMealIcon.className = 'fa-solid fa-location-dot';
+        resultContainer.innerHTML = `
+            <div class="bg-white rounded-3xl p-8 border border-slate-200 text-center shadow-lg animate-pop-in w-full">
+                <div class="text-5xl mb-4">📍</div>
+                <h3 class="text-xl font-bold text-slate-800 mb-2">Hungry to go out?</h3>
+                <p class="text-slate-500 max-w-md mx-auto text-sm">
+                    We prefetch your location in the background, then race multiple free Overpass mirrors so results show up faster.
+                </p>
+            </div>
+        `;
+        resolveUserLocation(false).catch(() => {});
+    }
+}
+
+function fetchWithTimeout(url, options = {}, timeoutMs = 5000) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeoutMs);
+    return fetch(url, { ...options, signal: controller.signal }).finally(() => clearTimeout(timer));
+}
+
+function haversineKm(lat1, lon1, lat2, lon2) {
+    const toRad = (deg) => (deg * Math.PI) / 180;
+    const R = 6371;
+    const dLat = toRad(lat2 - lat1);
+    const dLon = toRad(lon2 - lon1);
+    const a =
+        Math.sin(dLat / 2) ** 2 +
+        Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+function formatDistance(km) {
+    if (km < 1) return `${Math.round(km * 1000)} m`;
+    return `${km.toFixed(1)} km`;
+}
+
+function getBrowserPosition(timeoutMs = GEO_TIMEOUT_MS) {
+    return new Promise((resolve, reject) => {
+        if (!navigator.geolocation) {
+            reject(new Error('Geolocation is not supported by this browser.'));
+            return;
+        }
+        navigator.geolocation.getCurrentPosition(
+            (pos) => resolve({ lat: pos.coords.latitude, lon: pos.coords.longitude, source: 'device' }),
+            (err) => reject(err),
+            { enableHighAccuracy: false, timeout: timeoutMs, maximumAge: 600000 }
+        );
+    });
+}
+
+async function getIpFallbackPosition() {
+    const response = await fetchWithTimeout(GEOJS_URL, {}, IP_TIMEOUT_MS);
+    if (!response.ok) throw new Error(`GeoJS HTTP ${response.status}`);
+    const data = await response.json();
+    const lat = parseFloat(data.latitude);
+    const lon = parseFloat(data.longitude);
+    if (Number.isNaN(lat) || Number.isNaN(lon)) {
+        throw new Error('GeoJS returned invalid coordinates.');
+    }
+    const place = [data.city, data.region, data.country].filter(Boolean).join(', ');
+    return { lat, lon, source: 'ip', label: place || 'approximate IP location' };
+}
+
+async function resolveUserLocation(forceRefresh = false) {
+    if (userLocation && !forceRefresh) return userLocation;
+    if (locationPromise && !forceRefresh) return locationPromise;
+
+    locationPromise = (async () => {
+        updateRestaurantLoadingDetail('Getting your location…');
+
+        const deviceAttempt = getBrowserPosition(GEO_TIMEOUT_MS)
+            .then((loc) => ({ ok: true, loc }))
+            .catch((err) => ({ ok: false, err }));
+
+        const ipAttempt = getIpFallbackPosition()
+            .then((loc) => ({ ok: true, loc }))
+            .catch((err) => ({ ok: false, err }));
+
+        const earlyDevice = await Promise.race([
+            deviceAttempt,
+            new Promise((resolve) => setTimeout(() => resolve({ ok: false, err: new Error('geo-soft-timeout') }), 1200))
+        ]);
+
+        if (earlyDevice.ok) {
+            userLocation = earlyDevice.loc;
+            setLocationStatus(
+                `Using device location (${userLocation.lat.toFixed(4)}, ${userLocation.lon.toFixed(4)}). Data © OpenStreetMap / Overpass.`
+            );
+            return userLocation;
+        }
+
+        const [deviceResult, ipResult] = await Promise.all([deviceAttempt, ipAttempt]);
+
+        if (deviceResult.ok) {
+            userLocation = deviceResult.loc;
+            setLocationStatus(
+                `Using device location (${userLocation.lat.toFixed(4)}, ${userLocation.lon.toFixed(4)}). Data © OpenStreetMap / Overpass.`
+            );
+            return userLocation;
+        }
+
+        if (ipResult.ok) {
+            userLocation = ipResult.loc;
+            setLocationStatus(
+                `Using approximate IP location${userLocation.label ? ` (${userLocation.label})` : ''}. Allow location access for better accuracy.`
+            );
+            return userLocation;
+        }
+
+        setLocationStatus('Could not determine your location. Please allow location access and try again.', true);
+        throw new Error('Unable to determine location from device or IP fallback.');
+    })();
+
+    try {
+        return await locationPromise;
+    } catch (err) {
+        locationPromise = null;
+        throw err;
+    }
+}
+
+function buildOverpassQuery(lat, lon, radiusMeters, placeType) {
+    const amenityFilter =
+        placeType && placeType !== 'Any'
+            ? `["amenity"="${placeType}"]`
+            : '["amenity"~"^(restaurant|fast_food|cafe|food_court)$"]';
+
+    return `
+[out:json][timeout:10];
+node${amenityFilter}(around:${radiusMeters},${lat},${lon});
+out tags 30;
+`.trim();
+}
+
+async function fetchOverpass(query) {
+    const body = `data=${encodeURIComponent(query)}`;
+    const errors = [];
+
+    const attempts = OVERPASS_ENDPOINTS.map(async (endpoint) => {
+        const response = await fetchWithTimeout(
+            endpoint,
+            {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
+                body
+            },
+            OVERPASS_TIMEOUT_MS
+        );
+        if (!response.ok) {
+            throw new Error(`Overpass HTTP ${response.status} at ${endpoint}`);
+        }
+        const data = await response.json();
+        return { endpoint, data };
+    });
+
+    return await new Promise((resolve, reject) => {
+        let remaining = attempts.length;
+        let settled = false;
+
+        attempts.forEach((p) => {
+            p.then((result) => {
+                if (!settled) {
+                    settled = true;
+                    resolve(result);
+                }
+            }).catch((err) => {
+                errors.push(err);
+                remaining -= 1;
+                if (remaining === 0 && !settled) {
+                    reject(errors[errors.length - 1] || new Error('All Overpass mirrors failed.'));
+                }
+            });
+        });
+    });
+}
+
+function titleCaseAmenity(amenity) {
+    return String(amenity || 'place')
+        .replace(/_/g, ' ')
+        .replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+function placeEmoji(amenity) {
+    switch (amenity) {
+        case 'cafe': return '☕';
+        case 'fast_food': return '🍔';
+        case 'food_court': return '🥡';
+        case 'restaurant':
+        default: return '🍽️';
+    }
+}
+
+function normalizePlace(element, origin) {
+    const tags = element.tags || {};
+    const lat = element.lat ?? element.center?.lat;
+    const lon = element.lon ?? element.center?.lon;
+    if (lat == null || lon == null || !tags.name) return null;
+
+    const distanceKm = haversineKm(origin.lat, origin.lon, lat, lon);
+    const addressParts = [
+        tags['addr:housenumber'],
+        tags['addr:street'],
+        tags['addr:city'] || tags['addr:suburb']
+    ].filter(Boolean);
+
+    return {
+        id: `${element.type}/${element.id}`,
+        name: tags.name,
+        amenity: tags.amenity || 'restaurant',
+        cuisine: tags.cuisine || '',
+        cuisineDisplay: tags.cuisine
+            ? tags.cuisine.split(';').map((c) => c.trim().replace(/_/g, ' ')).join(', ')
+            : 'Cuisine not listed',
+        phone: tags.phone || tags['contact:phone'] || '',
+        website: safeHttpUrl(tags.website || tags['contact:website'] || ''),
+        openingHours: tags.opening_hours || '',
+        address: addressParts.join(' ') || tags['addr:full'] || '',
+        lat,
+        lon,
+        distanceKm,
+        distanceLabel: formatDistance(distanceKm),
+        emoji: placeEmoji(tags.amenity),
+        mapsUrl: `https://www.openstreetmap.org/?mlat=${lat}&mlon=${lon}#map=18/${lat}/${lon}`
+    };
+}
+
+function matchesCuisineFilter(place, cuisineFilter) {
+    if (!cuisineFilter || cuisineFilter === 'Any') return true;
+    const keywords = CUISINE_KEYWORD_MAP[cuisineFilter] || [cuisineFilter.toLowerCase()];
+    const haystack = `${place.cuisine} ${place.name}`.toLowerCase();
+    return keywords.some((kw) => haystack.includes(kw.toLowerCase()));
+}
+
+function cacheKey(lat, lon, radius, placeType, cuisineFilter) {
+    return [lat.toFixed(3), lon.toFixed(3), radius, placeType || 'Any', cuisineFilter || 'Any'].join('|');
+}
+
+function getCachedPlaces(key) {
+    const hit = restaurantCache.get(key);
+    if (!hit) return null;
+    if (Date.now() - hit.ts > RESTAURANT_CACHE_TTL_MS) {
+        restaurantCache.delete(key);
+        return null;
+    }
+    return hit.places;
+}
+
+function setCachedPlaces(key, places) {
+    restaurantCache.set(key, { ts: Date.now(), places });
+}
+
+async function searchNearbyRestaurants({ surprise = false } = {}) {
+    setRestaurantLoading(true, surprise ? 'Picking a surprise spot…' : 'Finding nearby places…', 'Resolving location…');
+
+    try {
+        const location = await resolveUserLocation(false);
+        const radius = Number(radiusSelect?.value) || 1000;
+        const placeType = surprise ? 'Any' : (placeTypeSelect?.value || 'Any');
+        const cuisineFilter = surprise ? 'Any' : (cuisineSelect?.value || 'Any');
+
+        if (surprise) {
+            if (cuisineSelect) cuisineSelect.value = 'Any';
+            if (placeTypeSelect) placeTypeSelect.value = 'Any';
+        }
+
+        const key = cacheKey(location.lat, location.lon, radius, placeType, cuisineFilter);
+        let places = getCachedPlaces(key);
+
+        if (places) {
+            updateRestaurantLoadingDetail('Loaded from recent cache…');
+        } else {
+            updateRestaurantLoadingDetail('Racing free Overpass mirrors…');
+            const query = buildOverpassQuery(location.lat, location.lon, radius, placeType);
+            const { data, endpoint } = await fetchOverpass(query);
+            updateRestaurantLoadingDetail(`Got response from ${endpoint.replace('https://', '').split('/')[0]}…`);
+
+            const elements = Array.isArray(data.elements) ? data.elements : [];
+            places = elements
+                .map((el) => normalizePlace(el, location))
+                .filter(Boolean)
+                .filter((p) => matchesCuisineFilter(p, cuisineFilter));
+
+            const seen = new Set();
+            places = places.filter((p) => {
+                const dedupe = `${p.name.toLowerCase()}|${p.lat.toFixed(4)}|${p.lon.toFixed(4)}`;
+                if (seen.has(dedupe)) return false;
+                seen.add(dedupe);
+                return true;
+            });
+
+            places.sort((a, b) => a.distanceKm - b.distanceKm);
+            setCachedPlaces(key, places);
+        }
+
+        lastRestaurants = places;
+
+        if (places.length === 0) {
+            renderRestaurantEmpty({ cuisineFilter, radius, placeType });
+            return;
+        }
+
+        if (surprise) {
+            renderRestaurantFocus(places[Math.floor(Math.random() * places.length)], places);
+        } else {
+            renderRestaurantList(places);
+        }
+    } catch (error) {
+        console.error('Nearby restaurant search failed:', error);
+        resultContainer.innerHTML = `
+            <div class="bg-red-50 text-red-700 rounded-2xl p-6 border border-red-200 text-center animate-pop-in w-full">
+                <i class="fa-solid fa-triangle-exclamation text-2xl mb-2"></i>
+                <p class="font-bold">Couldn't load nearby restaurants.</p>
+                <p class="text-xs mt-2 max-w-md mx-auto">${escapeHtml(error.message || 'Unknown error')}</p>
+                <p class="text-xs mt-2 text-red-600/80">Free Overpass mirrors can be busy — try again, or allow location access.</p>
+            </div>
+        `;
+    } finally {
+        setRestaurantLoading(false);
+    }
+}
+
+function renderRestaurantEmpty({ cuisineFilter, radius, placeType }) {
+    resultContainer.innerHTML = `
+        <div class="bg-white rounded-3xl p-8 border border-slate-200 text-center shadow-lg animate-pop-in w-full">
+            <div class="text-5xl mb-4">🗺️</div>
+            <h3 class="text-xl font-bold text-slate-800 mb-2">No places found nearby</h3>
+            <p class="text-slate-500 max-w-md mx-auto mb-6 text-sm">
+                Nothing matched within ${escapeHtml(String(radius))} m
+                ${placeType && placeType !== 'Any' ? ` for <strong>${escapeHtml(titleCaseAmenity(placeType))}</strong>` : ''}
+                ${cuisineFilter && cuisineFilter !== 'Any' ? ` with cuisine filter <strong>${escapeHtml(cuisineFilter)}</strong>` : ''}.
+                Try a larger radius or set cuisine to Any.
+            </p>
+            <button id="retryWiderBtn" class="bg-brand-600 hover:bg-brand-700 text-white font-semibold py-2.5 px-6 rounded-xl transition-all cursor-pointer">
+                Expand to 5 km &amp; retry
+            </button>
+        </div>
+    `;
+    document.getElementById('retryWiderBtn')?.addEventListener('click', () => {
+        if (radiusSelect) radiusSelect.value = '5000';
+        if (cuisineSelect) cuisineSelect.value = 'Any';
+        if (placeTypeSelect) placeTypeSelect.value = 'Any';
+        searchNearbyRestaurants({ surprise: false });
+    });
+}
+
+function restaurantCardHtml(place, { featured = false } = {}) {
+    const typeLabel = titleCaseAmenity(place.amenity);
+    return `
+        <article class="bg-white rounded-3xl overflow-hidden shadow-xl border border-slate-100 w-full ${featured ? 'animate-pop-in' : ''}">
+            <div class="bg-gradient-to-r from-teal-600 via-brand-600 to-emerald-700 p-5 sm:p-6 text-white">
+                <div class="flex items-start gap-4">
+                    <div class="w-14 h-14 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center text-3xl shrink-0">${escapeHtml(place.emoji)}</div>
+                    <div class="min-w-0 flex-1">
+                        <h3 class="text-xl sm:text-2xl font-extrabold tracking-tight truncate">${escapeHtml(place.name)}</h3>
+                        <p class="text-brand-100 text-sm mt-1 flex flex-wrap items-center gap-x-3 gap-y-1">
+                            <span><i class="fa-solid fa-person-walking mr-1"></i>${escapeHtml(place.distanceLabel)} away</span>
+                            <span><i class="fa-solid fa-store mr-1"></i>${escapeHtml(typeLabel)}</span>
+                        </p>
+                    </div>
+                </div>
+                <div class="flex flex-wrap gap-2 mt-4">
+                    <span class="px-3 py-1 bg-white/20 backdrop-blur-md text-white font-medium text-xs rounded-full border border-white/20">
+                        🌍 ${escapeHtml(place.cuisineDisplay)}
+                    </span>
+                    ${place.openingHours ? `
+                        <span class="px-3 py-1 bg-white/20 backdrop-blur-md text-white font-medium text-xs rounded-full border border-white/20">
+                            🕒 ${escapeHtml(place.openingHours)}
+                        </span>
+                    ` : ''}
+                </div>
+            </div>
+            <div class="p-5 sm:p-6 space-y-3">
+                ${place.address ? `
+                    <p class="text-sm text-slate-600 flex items-start gap-2">
+                        <i class="fa-solid fa-map-pin text-brand-500 mt-0.5"></i>
+                        <span>${escapeHtml(place.address)}</span>
+                    </p>
+                ` : ''}
+                <div class="flex flex-wrap gap-2 pt-1">
+                    <a href="${escapeHtml(place.mapsUrl)}" target="_blank" rel="noopener noreferrer"
+                        class="inline-flex items-center gap-2 text-sm font-semibold bg-brand-50 text-brand-700 hover:bg-brand-100 border border-brand-100 px-3 py-2 rounded-xl transition-colors">
+                        <i class="fa-solid fa-map-location-dot"></i> Open in OSM
+                    </a>
+                    ${place.website ? `
+                        <a href="${escapeHtml(place.website)}" target="_blank" rel="noopener noreferrer"
+                            class="inline-flex items-center gap-2 text-sm font-semibold bg-slate-50 text-slate-700 hover:bg-slate-100 border border-slate-200 px-3 py-2 rounded-xl transition-colors">
+                            <i class="fa-solid fa-globe"></i> Website
+                        </a>
+                    ` : ''}
+                    ${place.phone ? `
+                        <a href="tel:${escapeHtml(place.phone)}"
+                            class="inline-flex items-center gap-2 text-sm font-semibold bg-slate-50 text-slate-700 hover:bg-slate-100 border border-slate-200 px-3 py-2 rounded-xl transition-colors">
+                            <i class="fa-solid fa-phone"></i> ${escapeHtml(place.phone)}
+                        </a>
+                    ` : ''}
+                </div>
+            </div>
+        </article>
+    `;
+}
+
+function renderRestaurantList(places) {
+    const top = places.slice(0, 12);
+    resultContainer.innerHTML = `
+        <div class="space-y-4 animate-pop-in w-full">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                <div>
+                    <h3 class="text-lg font-bold text-slate-900">
+                        <i class="fa-solid fa-store text-brand-500 mr-1"></i>
+                        ${top.length} place${top.length === 1 ? '' : 's'} nearby
+                    </h3>
+                    <p class="text-xs text-slate-500 mt-0.5">Sorted by distance · cached for 5 min · free Overpass mirrors</p>
+                </div>
+                <button id="restaurantSurpriseBtn" class="text-sm font-semibold text-brand-700 bg-brand-50 hover:bg-brand-100 border border-brand-100 px-4 py-2 rounded-xl cursor-pointer transition-colors">
+                    <i class="fa-solid fa-dice mr-1"></i> Surprise pick from results
+                </button>
+            </div>
+            <div class="grid grid-cols-1 gap-4">
+                ${top.map((p) => restaurantCardHtml(p)).join('')}
+            </div>
+        </div>
+    `;
+    document.getElementById('restaurantSurpriseBtn')?.addEventListener('click', () => {
+        if (lastRestaurants.length) {
+            renderRestaurantFocus(lastRestaurants[Math.floor(Math.random() * lastRestaurants.length)], lastRestaurants);
+        }
+    });
+}
+
+function renderRestaurantFocus(place, allPlaces) {
+    resultContainer.innerHTML = `
+        <div class="space-y-4 w-full">
+            <div class="flex items-center justify-between gap-2">
+                <p class="text-sm font-semibold text-slate-600">
+                    <i class="fa-solid fa-sparkles text-brand-500 mr-1"></i> Tonight's pick
+                </p>
+                <button id="backToListBtn" class="text-xs font-semibold text-slate-500 hover:text-slate-700 underline cursor-pointer">
+                    Back to all ${allPlaces.length} results
+                </button>
+            </div>
+            ${restaurantCardHtml(place, { featured: true })}
+            <div class="flex justify-center">
+                <button id="anotherSurpriseBtn" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2.5 px-5 rounded-xl cursor-pointer transition-all text-sm">
+                    <i class="fa-solid fa-dice text-brand-600 mr-1"></i> Another surprise
+                </button>
+            </div>
+        </div>
+    `;
+    document.getElementById('backToListBtn')?.addEventListener('click', () => renderRestaurantList(allPlaces));
+    document.getElementById('anotherSurpriseBtn')?.addEventListener('click', () => {
+        renderRestaurantFocus(allPlaces[Math.floor(Math.random() * allPlaces.length)], allPlaces);
+    });
+}
+
 // Initialize App
-document.addEventListener('DOMContentLoaded', loadRecipes);
+document.addEventListener('DOMContentLoaded', () => {
+    updateBadges();
+    setMode('recipes');
+    loadRecipes();
+});

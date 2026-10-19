@@ -86,16 +86,32 @@
     <!-- Strictly Centered Main Layout Container -->
     <main class="flex-grow min-h-screen flex flex-col items-center justify-start py-8 px-4 max-w-4xl mx-auto w-full space-y-6">
 
+        <!-- Mode Toggle: Cook at Home vs Nearby Restaurants -->
+        <section class="bg-white rounded-3xl p-2 shadow-xl shadow-slate-200/50 border border-slate-100 w-full">
+            <div class="grid grid-cols-2 gap-2" role="tablist" aria-label="Meal source">
+                <button id="modeRecipesBtn" type="button" aria-selected="true"
+                    class="mode-btn flex items-center justify-center gap-2 py-3 px-4 rounded-2xl font-semibold text-sm transition-all cursor-pointer bg-brand-600 text-white shadow-md shadow-brand-500/20">
+                    <i class="fa-solid fa-kitchen-set"></i>
+                    <span>Cook at Home</span>
+                </button>
+                <button id="modeRestaurantsBtn" type="button" aria-selected="false"
+                    class="mode-btn flex items-center justify-center gap-2 py-3 px-4 rounded-2xl font-semibold text-sm transition-all cursor-pointer bg-transparent text-slate-600 hover:bg-slate-50">
+                    <i class="fa-solid fa-location-dot"></i>
+                    <span>Nearby Restaurants</span>
+                </button>
+            </div>
+        </section>
+
         <!-- Primary Control Box (Inline Expandable) -->
         <section class="bg-white rounded-3xl p-6 sm:p-8 shadow-xl shadow-slate-200/50 border border-slate-100 w-full space-y-6">
             <div class="text-center">
                 <h2 class="text-2xl font-extrabold text-slate-900 tracking-tight">What should we eat today?</h2>
-                <p class="text-slate-500 text-xs sm:text-sm mt-1">Select a quick preference or let us pick a random meal!</p>
+                <p id="controlsSubtitle" class="text-slate-500 text-xs sm:text-sm mt-1">Select a quick preference or let us pick a random meal!</p>
             </div>
 
-            <!-- Primary 2 Dropdowns (Course & Cuisine) -->
+            <!-- Primary dropdowns -->
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div class="space-y-1">
+                <div id="courseFilterGroup" class="space-y-1 recipe-only-filter">
                     <label for="courseSelect" class="block text-[11px] font-bold uppercase tracking-wider text-slate-400">Course</label>
                     <select id="courseSelect" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-700 font-medium focus:outline-none focus:ring-2 focus:ring-brand-500/20 cursor-pointer transition-colors">
                         <option value="Any">Any Course</option>
@@ -118,8 +134,36 @@
                 </div>
             </div>
 
+            <!-- Restaurant-only filters -->
+            <div id="restaurantFiltersRow" class="restaurant-only-filter hidden grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="space-y-1">
+                    <label for="placeTypeSelect" class="block text-[11px] font-bold uppercase tracking-wider text-slate-400">Place Type</label>
+                    <select id="placeTypeSelect" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-700 font-medium focus:outline-none focus:ring-2 focus:ring-brand-500/20 cursor-pointer transition-colors">
+                        <option value="Any">Any Type</option>
+                        <option value="restaurant">Restaurant</option>
+                        <option value="fast_food">Fast Food</option>
+                        <option value="cafe">Cafe</option>
+                        <option value="food_court">Food Court</option>
+                    </select>
+                </div>
+                <div class="space-y-1">
+                    <label for="radiusSelect" class="block text-[11px] font-bold uppercase tracking-wider text-slate-400">Search Radius</label>
+                    <select id="radiusSelect" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-700 font-medium focus:outline-none focus:ring-2 focus:ring-brand-500/20 cursor-pointer transition-colors">
+                        <option value="500">Within 0.5 km</option>
+                        <option value="1000" selected>Within 1 km</option>
+                        <option value="2000">Within 2 km</option>
+                        <option value="5000">Within 5 km</option>
+                    </select>
+                </div>
+            </div>
+
+            <div id="locationStatus" class="restaurant-only-filter hidden text-xs text-slate-500 flex items-start gap-2 bg-slate-50 border border-slate-100 rounded-xl px-4 py-3">
+                <i class="fa-solid fa-satellite-dish mt-0.5 text-brand-500"></i>
+                <span id="locationStatusText">Location is prepared in the background. Places come from OpenStreetMap via free Overpass mirrors (no API key).</span>
+            </div>
+
             <!-- Inline Expandable Controls (Protein, Style, Difficulty, Mood) -->
-            <div id="expandedFiltersPanel" class="hidden pt-4 border-t border-slate-100 grid grid-cols-1 sm:grid-cols-2 gap-4 animate-pop-in">
+            <div id="expandedFiltersPanel" class="hidden pt-4 border-t border-slate-100 grid grid-cols-1 sm:grid-cols-2 gap-4 animate-pop-in recipe-only-filter">
                 <div class="space-y-1">
                     <label for="proteinSelect" class="block text-[11px] font-bold uppercase tracking-wider text-slate-400">Protein</label>
                     <select id="proteinSelect" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-700 font-medium focus:outline-none focus:ring-2 focus:ring-brand-500/20 cursor-pointer transition-colors">
@@ -178,16 +222,16 @@
             <div class="flex flex-col sm:flex-row items-center gap-3 pt-2">
                 <button id="findMealBtn" class="w-full sm:flex-1 bg-brand-600 hover:bg-brand-700 active:scale-[0.98] text-white font-semibold py-3.5 px-6 rounded-xl shadow-lg shadow-brand-500/30 transition-all cursor-pointer flex items-center justify-center gap-2">
                     <i id="findMealIcon" class="fa-solid fa-utensils"></i>
-                    <span>Find Me a Meal</span>
+                    <span id="findMealBtnLabel">Find Me a Meal</span>
                 </button>
                 <button id="surpriseBtn" class="w-full sm:w-auto bg-slate-100 hover:bg-slate-200 active:scale-[0.98] text-slate-700 font-semibold py-3.5 px-6 rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer">
                     <i id="surpriseIcon" class="fa-solid fa-dice text-brand-600"></i>
-                    <span>Surprise Me!</span>
+                    <span id="surpriseBtnLabel">Surprise Me!</span>
                 </button>
             </div>
 
             <!-- Custom Filter Toggle Button -->
-            <div class="text-center pt-1">
+            <div id="customizeMoreWrap" class="text-center pt-1 recipe-only-filter">
                 <button id="toggleInlineFiltersBtn" class="text-xs font-bold text-slate-400 hover:text-brand-600 transition-colors cursor-pointer flex items-center justify-center gap-1.5 mx-auto">
                     <i class="fa-solid fa-sliders"></i>
                     <span>Customize More (Protein, Style, Mood)</span>
@@ -218,6 +262,7 @@
     <!-- Footer -->
     <footer class="bg-white border-t border-slate-200 py-6 text-center text-xs text-slate-400 mt-auto w-full">
         <p>© ThymeToEat. Powered by Vanilla JS & Tailwind CSS.</p>
+        <p class="mt-1">Nearby places from <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer" class="underline hover:text-slate-600">OpenStreetMap</a> contributors via free Overpass mirrors.</p>
     </footer>
 
     <!-- App Logic Script -->
