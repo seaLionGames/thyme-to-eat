@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ThymeToEat – Browser Tests</title>
+    <style>
+        body { font-family: sans-serif; max-width: 800px; margin: 2rem auto; }
+        .pass { color: #15803d; } .fail { color: #b91c1c; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h1>ThymeToEat tests</h1>
+    <p id="summary">Running…</p>
+    <ul id="results"></ul>
+    <script src="tests/known-favorites.js"></script>
+    <script>
+    // Serve over http (e.g. `python3 -m http.server`) and open /tests.html
+    const tests = [];
+    const test = (name, fn) => tests.push({ name, fn });
+    const assert = (cond, msg) => { if (!cond) throw new Error(msg); };
+
+    let recipes = [];
+
+    test('recipes.json loads as a non-empty array', async () => {
+        const res = await fetch('recipes.json');
+        assert(res.ok, `HTTP ${res.status}`);
+        recipes = await res.json();
+        assert(Array.isArray(recipes) && recipes.length > 0, 'no recipes');
+    });
+
+    test('every known favorite is still in the database', () => {
+        const names = new Set(recipes.map(r => r.name));
+        const missing = window.KNOWN_FAVORITES.filter(n => !names.has(n));
+        assert(missing.length === 0, 'missing favorites: ' + missing.join(', '));
+    });
+
+    test('recipe ids are unique', () => {
+        const ids = recipes.map(r => r.id);
+        assert(new Set(ids).size === ids.length, 'duplicate ids');
+    });
+
+    test('recipe names are unique', () => {
+        const names = recipes.map(r => r.name);
+        assert(new Set(names).size === names.length, 'duplicate names');
+    });
+
+    test('every recipe has required fields', () => {
+        const strings = ['name', 'emoji', 'prepTime', 'course', 'cuisine', 'protein', 'baseStyle', 'difficulty', 'mood', 'description'];
+        for (const r of recipes) {
+            for (const f of strings) assert(typeof r[f] === 'string' && r[f].trim(), `${r.name}: missing ${f}`);
+            for (const f of ['ingredients', 'instructions']) {
+                assert(Array.isArray(r[f]) && r[f].length > 0, `${r.name}: missing ${f}`);
+            }
+        }
+    });
+
+    (async () => {
+        const list = document.getElementById('results');
+        let failed = 0;
+        for (const t of tests) {
+            const li = document.createElement('li');
+            try { await t.fn(); li.className = 'pass'; li.textContent = '✔ ' + t.name; }
+            catch (e) { failed++; li.className = 'fail'; li.textContent = '✘ ' + t.name + ' — ' + e.message; }
+            list.appendChild(li);
+        }
+        document.getElementById('summary').textContent = failed ? `${failed} test(s) failed` : `All ${tests.length} tests passed`;
+        document.title = failed ? 'FAIL' : 'PASS';
+    })();
+    </script>
+</body>
+</html>
