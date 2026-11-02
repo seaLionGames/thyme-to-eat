@@ -37,3 +37,11 @@ python3 -m http.server 8080
 - `index.html` — UI shell (Tailwind CDN)
 - `app.js` — recipe engine + nearby restaurant integration
 - `recipes.json` — local recipe dataset
+
+## Tests
+
+Browser-based tests verify the recipe database (including that our known favorites in `tests/known-favorites.js` never disappear). Serve the folder and open `tests.html`:
+
+```bash
+python3 -m http.server 8000   # then visit http://localhost:8000/tests.html
+```
