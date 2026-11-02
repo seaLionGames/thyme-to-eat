@@ -21,8 +21,8 @@ Place data is © [OpenStreetMap](https://www.openstreetmap.org/copyright) contri
 
 - Prefetch location when switching to **Nearby Restaurants**
 - Race device GPS vs IP geolocation (first usable fix wins; soft 1.2s GPS preference)
-- Race multiple Overpass mirrors in parallel with 8s client timeouts
-- Lean Overpass query (`node` + `out tags`, 10s server timeout, default 1 km radius)
+- Race multiple Overpass mirrors in parallel with 2-minute client timeouts (free mirrors can be busy)
+- Lean Overpass query (`node` + `out tags`, 120s server timeout, default 1 km radius)
 - 5-minute in-memory result cache for repeated searches
 
 ## Run locally
